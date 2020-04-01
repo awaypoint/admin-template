@@ -147,12 +147,19 @@ export const constantRoutes = [
       }
     ]
   },
-
+]
+/**
+ * 需要控制权限的菜单
+ * 需要route属性且需唯一
+ */
+export const asyncRoutes = [
   {
     path: 'external-link',
+    route:'external-link',
     component: Layout,
     children: [
       {
+        route: 'external-link',
         path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
         meta: { title: 'External Link', icon: 'link' }
       }
@@ -160,10 +167,10 @@ export const constantRoutes = [
   },
 
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
-]
+  { path: '*', route: '*', redirect: '/404', hidden: true }
+];
 
-const createRouter = () => new Router({
+export const createRouter = () => new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes

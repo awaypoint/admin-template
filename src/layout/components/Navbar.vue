@@ -5,9 +5,21 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+      <template v-if="device!=='mobile'">
+        <search id="header-search" class="right-menu-item" />
+
+        <!-- <error-log class="errLog-container right-menu-item hover-effect" /> -->
+
+        <screenfull id="screenfull" class="right-menu-item hover-effect" />
+
+        <!-- <el-tooltip content="Global Size" effect="dark" placement="bottom">
+          <size-select id="size-select" class="right-menu-item hover-effect" />
+        </el-tooltip> -->
+
+      </template>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <img src="@/assets/f778738c-e4f8-4870-b634-56703b4acafe.gif" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
@@ -35,16 +47,23 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import Screenfull from '@/components/Screenfull'
+// import SizeSelect from '@/components/SizeSelect'
+import Search from '@/components/HeaderSearch'
 
 export default {
   components: {
     Breadcrumb,
-    Hamburger
+    Hamburger,
+    Screenfull,
+    // SizeSelect,
+    Search
   },
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar'
+      'avatar',
+      'device'
     ])
   },
   methods: {

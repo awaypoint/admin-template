@@ -1,12 +1,13 @@
 import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
+import router, { resetRouter, asyncRoutes, constantRoutes } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    addRoutes: []
   }
 }
 
@@ -33,7 +34,7 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
+        const data = response.response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
         resolve()
@@ -47,13 +48,15 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
-        const { data } = response
+        const data = response.response
 
         if (!data) {
-          reject('Verification failed, please Login again.')
+          reject('登录失败，请重试！')
         }
 
-        const { name, avatar } = data
+        const userdata = data.user_data
+        const name = userdata.username
+        const avatar = userdata.avatar
 
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
