@@ -30,16 +30,19 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+
 export const constantRoutes = [
   {
     path: '/login',
     component: () => import('@/views/login/index'),
+    route:'',
     hidden: true
   },
 
   {
     path: '/404',
     component: () => import('@/views/404'),
+    route:'',
     hidden: true
   },
 
@@ -47,14 +50,22 @@ export const constantRoutes = [
     path: '/',
     component: Layout,
     redirect: '/dashboard',
+    route:'',
     children: [{
       path: 'dashboard',
       name: 'Dashboard',
+      route:'',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
     }]
-  },
+  }
+]
 
+/**
+ * 需要配置权限的菜单
+ * route = ’‘ 表示公有菜单
+ */
+export const asyncRoutes = [
   {
     path: '/example',
     component: Layout,
@@ -73,6 +84,12 @@ export const constantRoutes = [
         name: 'Tree',
         component: () => import('@/views/tree/index'),
         meta: { title: 'Tree', icon: 'tree' }
+      },
+      {
+        path: 'list',
+        name: 'List',
+        component: () => import('@/views/list/index'),
+        meta: { title: 'List', icon: 'tree' }
       }
     ]
   },
@@ -84,6 +101,7 @@ export const constantRoutes = [
       {
         path: 'index',
         name: 'Form',
+        route:'form',
         component: () => import('@/views/form/index'),
         meta: { title: 'Form', icon: 'form' }
       }
@@ -95,6 +113,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/nested/menu1',
     name: 'Nested',
+    route:'',
     meta: {
       title: 'Nested',
       icon: 'nested'
@@ -102,30 +121,35 @@ export const constantRoutes = [
     children: [
       {
         path: 'menu1',
+        route:'',
         component: () => import('@/views/nested/menu1/index'), // Parent router-view
         name: 'Menu1',
         meta: { title: 'Menu1' },
         children: [
           {
             path: 'menu1-1',
+            route:'',
             component: () => import('@/views/nested/menu1/menu1-1'),
             name: 'Menu1-1',
             meta: { title: 'Menu1-1' }
           },
           {
             path: 'menu1-2',
+            route:'',
             component: () => import('@/views/nested/menu1/menu1-2'),
             name: 'Menu1-2',
             meta: { title: 'Menu1-2' },
             children: [
               {
                 path: 'menu1-2-1',
+                route:'',
                 component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
                 name: 'Menu1-2-1',
                 meta: { title: 'Menu1-2-1' }
               },
               {
                 path: 'menu1-2-2',
+                route:'',
                 component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
                 name: 'Menu1-2-2',
                 meta: { title: 'Menu1-2-2' }
@@ -134,6 +158,7 @@ export const constantRoutes = [
           },
           {
             path: 'menu1-3',
+            route:'',
             component: () => import('@/views/nested/menu1/menu1-3'),
             name: 'Menu1-3',
             meta: { title: 'Menu1-3' }
@@ -142,17 +167,53 @@ export const constantRoutes = [
       },
       {
         path: 'menu2',
+        route:'',
         component: () => import('@/views/nested/menu2/index'),
         meta: { title: 'menu2' }
       }
     ]
   },
-]
-/**
- * 需要控制权限的菜单
- * 需要route属性且需唯一
- */
-export const asyncRoutes = [
+
+  {
+    path: '/system',
+    component: Layout,
+    redirect: '/system/user',
+    alwaysShow: true, // will always show the root menu
+    name: 'system',
+    meta: {
+      title: '系统设置',
+      icon: 'example'
+    },
+    children: [
+
+      {
+        path: 'user',
+        component: () => import('@/views/system/users/index'),
+        name: 'user',
+        meta: {
+          title: '用户管理'
+        }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/system/roles/index'),
+        name: 'roles',
+        meta: {
+          title: '角色管理'
+        }
+      },
+      {
+        path: 'permission',
+        hidden: true,
+        component: () => import('@/views/system/permission'),
+        name: 'permission',
+        meta: {
+          title: '权限列表'
+        }
+      }
+    ]
+  },
+
   {
     path: 'external-link',
     route:'external-link',
@@ -167,8 +228,8 @@ export const asyncRoutes = [
   },
 
   // 404 page must be placed at the end !!!
-  { path: '*', route: '*', redirect: '/404', hidden: true }
-];
+  { path: '*', route: '', redirect: '/404', hidden: true }
+]
 
 export const createRouter = () => new Router({
   // mode: 'history', // require service support

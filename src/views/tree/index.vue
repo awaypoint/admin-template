@@ -9,6 +9,7 @@
       :filter-node-method="filterNode"
       class="filter-tree"
       default-expand-all
+      show-checkbox
     />
 
   </div>
@@ -24,6 +25,16 @@ export default {
         id: 1,
         label: 'Level one 1',
         children: [{
+          id: 4,
+          label: 'Level two 1-1',
+          children: [{
+            id: 9,
+            label: 'Level three 1-1-1'
+          }, {
+            id: 10,
+            label: 'Level three 1-1-2'
+          }]
+        },{
           id: 4,
           label: 'Level two 1-1',
           children: [{
@@ -75,4 +86,7 @@ export default {
   }
 }
 </script>
+<style>
+
+</style>
 
