@@ -47,3 +47,13 @@
 .el-range-separator {
   box-sizing: content-box;
 }
+
+.el-dialog__footer{
+  border-top: 1px solid #e8e8e8;
+}
+
+.el-table__header th, .el-table__header tr {
+  // background-color: #63d9d6;
+  background-color: #d8dce4;
+  color: #606266;
+}

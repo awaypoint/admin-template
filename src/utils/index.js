@@ -105,3 +105,61 @@ export function param2Obj(url) {
       '"}'
   )
 }
+
+/**
+ * Check if an element has a class
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ * @returns {boolean}
+ */
+export function hasClass(ele, cls) {
+  return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
+}
+
+/**
+ * Add class to element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ */
+export function addClass(ele, cls) {
+  if (!hasClass(ele, cls)) ele.className += ' ' + cls
+}
+
+/**
+ * Remove class from element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ */
+export function removeClass(ele, cls) {
+  if (hasClass(ele, cls)) {
+    const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
+    ele.className = ele.className.replace(reg, ' ')
+  }
+}
+
+/**
+ * 生成随机字符串
+ * @param {int} len 
+ */
+export function randomStr(len = 6)
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < len; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+/**
+ * 权限检验
+ * @param {Object} allPermissions 
+ * @param {String} check 
+ */
+export function checkPermission(allPermissions, check)
+{
+  if (Object.values(allPermissions).includes(check)) {
+    return true
+  }
+  return false
+}

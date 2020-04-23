@@ -41,6 +41,10 @@
   @include colorBtn($yellow)
 }
 
+.gray-btn {
+  @include colorBtn($gray)
+}
+
 .pan-btn {
   font-size: 14px;
   color: #fff;

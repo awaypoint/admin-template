@@ -1,29 +1,5 @@
 import request from '@/utils/request'
 
-export function getUserList(data) {
-  return request({
-    url: 'getUserList',
-    method: 'post',
-    data
-  })
-}
-
-export function addUser(data) {
-  return request({
-    url: `/user/add`,
-    method: 'post',
-    data
-  })
-}
-
-export function updateUser(data) {
-  return request({
-    url: `/user/update`,
-    method: 'post',
-    data
-  })
-}
-
 export function removeUser(data) {
   return request({
     url: `/user/remove`,
@@ -36,17 +12,39 @@ export function removeUser(data) {
  * 角色管理
  * **/
 
-export function getRole(data) {
+export function getRoles(data) {
   return request({
-    url: `getRoleList`,
-    method: 'get',
+    url: `getRolesList`,
+    method: 'post',
     data
+  })
+}
+
+export function getRolesCombo() {
+  return request({
+    url: `getRolesCombo`,
+    method: 'get'
+  })
+}
+
+export function getAllMenus() {
+  return request({
+    url: `getAllMenus`,
+    method: 'get'
   })
 }
 
 export function addRole(data) {
   return request({
-    url: `/role/add`,
+    url: `addRole`,
+    method: 'post',
+    data
+  })
+}
+
+export function getRolePermission(data) {
+  return request({
+    url: `getRolePermission`,
     method: 'post',
     data
   })
@@ -54,7 +52,7 @@ export function addRole(data) {
 
 export function updateRole(data) {
   return request({
-    url: `/role/update`,
+    url: `updateRole`,
     method: 'post',
     data
   })
@@ -62,79 +60,31 @@ export function updateRole(data) {
 
 export function removeRole(data) {
   return request({
-    url: `/role/remove`,
+    url: `delRole`,
     method: 'post',
     data
   })
 }
 
 /**
- * 权限管理
- * **/
-
-export function getPermission(data) {
+ * 准备同步阿里巴巴数据
+ * @param {Object}} data 
+ */
+export function prepareAsyn(data) {
   return request({
-    url: `/permission/list`,
-    method: 'post',
-    data
-  })
-}
-
-export function addPermission(data) {
-  return request({
-    url: `/permission/add`,
-    method: 'post',
-    data
-  })
-}
-
-export function updatePermission(data) {
-  return request({
-    url: `/permission/update`,
-    method: 'post',
-    data
-  })
-}
-
-export function removePermission(data) {
-  return request({
-    url: `/permission/remove`,
+    url: `prepareAsyn`,
     method: 'post',
     data
   })
 }
 
 /**
- * 按钮配置
- * **/
-
-export function getButton(data) {
+ * 同步阿里巴巴数据
+ * @param {Object}} data 
+ */
+export function asynData(data) {
   return request({
-    url: `/button/list`,
-    method: 'post',
-    data
-  })
-}
-
-export function addButton(data) {
-  return request({
-    url: `/button/add`,
-    method: 'post',
-    data
-  })
-}
-
-export function updateButton(data) {
-  return request({
-    url: `/button/update`,
-    method: 'post',
-    data
-  })
-}
-
-export function removeButton(data) {
-  return request({
-    url: `/button/remove`,
+    url: `asynData`,
     method: 'post',
     data
   })

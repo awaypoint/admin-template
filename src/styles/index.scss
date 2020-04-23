@@ -172,8 +172,7 @@ aside {
 }
 
 .filter-container {
-  padding-bottom: 10px;
-  text-align: right;
+  padding-bottom: 0px;
 
   .filter-item {
     display: inline-block;
@@ -183,7 +182,7 @@ aside {
 }
 
 .filter-item-btn {
-  left: 20px;
+  right: 20px;
   position: absolute;
 }
 
@@ -194,4 +193,12 @@ aside {
 
 .multiselect--active {
   z-index: 1000 !important;
+}
+
+.btn-container {
+  text-align: right;
+  padding-bottom: 10px;
+}
+.dialog-form-cls {
+  padding-right: 20px;
 }

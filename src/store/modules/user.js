@@ -1,13 +1,16 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout, getInfo, modifyMyself } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import router, { resetRouter, asyncRoutes, constantRoutes } from '@/router'
+import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
     avatar: '',
-    addRoutes: []
+    roleName: '',
+    username: '',
+    mobile: '',
+    guided: false
   }
 }
 
@@ -25,6 +28,18 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_ROLE_NAME: (state, roleName) => {
+    state.roleName = roleName
+  },
+  SET_USER_NAME: (state, username) => {
+    state.username = username
+  },
+  SET_MOBILE: (state, mobile) => {
+    state.mobile = mobile
+  },
+  SET_GUIDED: (state, guided) => {
+    state.guided = guided
   }
 }
 
@@ -49,17 +64,18 @@ const actions = {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
         const data = response.response
-
         if (!data) {
           reject('登录失败，请重试！')
         }
 
         const userdata = data.user_data
-        const name = userdata.username
-        const avatar = userdata.avatar
 
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_NAME', userdata.nickname)
+        commit('SET_AVATAR', userdata.avatar)
+        commit('SET_ROLE_NAME', data.role_name)
+        commit('SET_USER_NAME', userdata.username)
+        commit('SET_MOBILE', userdata.mobile)
+        commit('SET_GUIDED', userdata.guided)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -87,6 +103,16 @@ const actions = {
       removeToken() // must remove  token  first
       commit('RESET_STATE')
       resolve()
+    })
+  },
+
+  modifyUser({ commit }, data) {
+    return new Promise(resolve => {
+      const res = modifyMyself(data)
+      commit('SET_MOBILE', data.mobile)
+      commit('SET_NAME', data.nickname)
+      commit('SET_AVATAR', data.avatar)
+      resolve(res)
     })
   }
 }

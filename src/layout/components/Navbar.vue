@@ -15,27 +15,25 @@
         <!-- <el-tooltip content="Global Size" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip> -->
+        <asyn id="asyn-btn" class="right-menu-item hover-effect"/>
 
       </template>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img src="@/assets/f778738c-e4f8-4870-b634-56703b4acafe.gif" class="user-avatar">
+          <img :src="avatar" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
+          <el-dropdown-item divided @click.native="showRightPannel">
+            个人中心
+          </el-dropdown-item>
           <router-link to="/">
             <el-dropdown-item>
-              Home
+              首页
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">安全退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -48,8 +46,10 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import Screenfull from '@/components/Screenfull'
+import Asyn from '@/components/AsynBtn'
 // import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
+import { addClass, removeClass } from '@/utils'
 
 export default {
   components: {
@@ -57,7 +57,8 @@ export default {
     Hamburger,
     Screenfull,
     // SizeSelect,
-    Search
+    Search,
+    Asyn
   },
   computed: {
     ...mapGetters([
@@ -73,10 +74,17 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    showRightPannel() {
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'showSettings',
+        value: true
+      })
     }
   }
 }
 </script>
+
 
 <style lang="scss" scoped>
 .navbar {

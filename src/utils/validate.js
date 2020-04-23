@@ -17,3 +17,11 @@ export function isExternal(path) {
 export function validUsername(str) {
   return str !== ''
 }
+/**
+ * 匹配手机号
+ * @param {bigint} mobile 
+ */
+export function validMobile(mobile) {
+  const reg = /^1[0-9]{10}$/
+  return reg.test(mobile)
+}

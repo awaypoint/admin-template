@@ -6,7 +6,7 @@ import { asyncRoutes, constantRoutes } from '@/router'
  * @param route
  */
 function hasPermission(permissions, route) {
-  if (Object.values(permissions).includes(route.route) || typeof(route.route) == 'undefined') {
+  if (Object.values(permissions).includes(route.route) || typeof(route.route) === 'undefined') {
     return true
   }
   return false
