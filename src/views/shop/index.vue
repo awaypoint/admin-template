@@ -60,8 +60,8 @@
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
             </el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="授权" placement="bottom-end" v-show="checkPermission('delShop')">
-            <el-button icon="el-icon-connection" size="mini" type="primary" @click="handleDelete(scope.row.id)">
+          <el-tooltip class="item" effect="dark" content="授权" placement="bottom-end" v-show="checkAuth(scope.row)">
+            <el-button icon="el-icon-connection" size="mini" type="primary" @click="gotoAuth(scope.row.auth_url)">
             </el-button>
           </el-tooltip>
         </template>
@@ -71,7 +71,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page_no"
+      :page.sync="listQuery.page"
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
@@ -138,7 +138,7 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page_no: 1,
+        page: 1,
         page_size: 10,
         name: undefined,
         type: undefined,
@@ -183,8 +183,16 @@ export default {
       return true
       return checkPermission(this.permissions, check)
     },
+    checkAuth(row) {
+      if (!this.checkPermission('delShop')) {
+        return false
+      }
+      if (!row.auth_url) {
+        return false
+      }
+      return true
+    },
     handleFilter() {
-      this.listQuery.page_no = 1
       this.getList()
     },
     handleAdd() {
@@ -293,6 +301,9 @@ export default {
           this.btnLoding = false
         }
       })
+    },
+    gotoAuth(url) {
+      window.open(url, '_blank')
     }
   }
 }

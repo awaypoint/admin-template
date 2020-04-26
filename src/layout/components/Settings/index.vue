@@ -1,73 +1,46 @@
 <template>
   <div>
-    <el-card style="margin-bottom:20px;">
+    <el-card style="margin-bottom:20px;height:100vh">
       <div slot="header" class="clearfix">
         <span>个人中心</span>
+        <i class="el-icon-close" style="float: right;cursor: pointer;" @click="closePanel"/>
       </div>
 
       <div class="user-profile">
         <div class="box-center">
           <pan-thumb :image="user.avatar" :height="'100px'" :width="'100px'" :hoverable="false">
-            <i class="el-icon-upload" @click="imagecropperShow=true" style="font-size:40px;margin-top: 10px;"/>
+            <i class="el-icon-upload" @click="showCropper" style="font-size:40px;margin-top: 10px;cursor: pointer;"/>
           </pan-thumb>
         </div>
         <div class="box-center">
           <div class="user-name text-center">{{ user.roleName }}</div>
           <div class="user-role text-center text-muted">{{ user.name }}</div>
         </div>
+        <el-divider></el-divider>
+        <div class="box-center">
+          <div class="user-profile-form-i">
+            <i class="el-icon-edit" @click="modifyForm"/>
+          </div>
+          <el-form :model="formData" label-width="50px">
+            <el-form-item prop="nickname" label="昵称">
+              <el-input v-model="formData.nickname" :readonly="formReadOnly" ref="nicknameInput" @blur="modifyUser"></el-input>
+            </el-form-item>
+            <el-form-item label="手机号">
+              <el-input v-model="formData.mobile" :readonly="formReadOnly" @blur="modifyUser"></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
       </div>
     </el-card>
-    <div class="user-profile-form">
-      <el-form label-position="right" label-width="130px" :model="formData">
-        <el-form-item label="昵称">
-          <el-input v-model="formData.nickname"></el-input>
-        </el-form-item>
-        <el-form-item label="手机号">
-          <el-input v-model="formData.mobile"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="user-profile-form-btn">
-        <el-button type="primary" @click="modifyUser">保存</el-button>
-      </div>
-    </div>
-    <el-divider></el-divider>
-    <div class="user-profile-form">
-      <el-form label-position="right" label-width="130px" :model="ruleForm" :rules="rules" ref="ruleForm">
-        <el-form-item label="旧密码" prop="old_password">
-          <el-input v-model="ruleForm.old_password"></el-input>
-        </el-form-item>
-        <el-form-item label="新密码" prop="new_password">
-          <el-input v-model="ruleForm.new_password"></el-input>
-        </el-form-item>
-        <el-form-item label="密码确认" prop="new_password_confirm">
-          <el-input v-model="ruleForm.new_password_confirm"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="user-profile-form-btn">
-        <el-button type="danger" @click="modifyPwd">重置密码</el-button>
-      </div>
-    </div>
-    <image-cropper
-      v-show="imagecropperShow"
-      field="file"
-      :key="imagecropperKey"
-      :width="300"
-      :height="300"
-      :url="imageUpHost"
-      lang-type="zh"
-      @close="close"
-      @crop-upload-success="cropSuccess"
-    />
   </div>
 </template>
 
 <script>
-import { modifyPwd } from '@/api/user'
 import PanThumb from '@/components/PanThumb'
-import ImageCropper from '@/components/ImageCropper'
+import MdInput from '@/components/MDinput'
 
 export default {
-  components: { PanThumb, ImageCropper },
+  components: { PanThumb, MdInput },
   data() {
     const validPwdConfirm = (rule, value, callback) => {
       if (value !== this.ruleForm.new_password) {
@@ -105,7 +78,8 @@ export default {
       },
       imageUpHost:process.env.VUE_APP_BASE_API + 'uploadFile',
       imagecropperShow: false,
-      imagecropperKey: 0
+      imagecropperKey: 0,
+      formReadOnly: true
     }
   },
   computed: {
@@ -145,49 +119,35 @@ export default {
   },
   methods: {
     modifyUser() {
-      this.$store.dispatch("user/modifyUser", this.formData).then((res)=>{
-        if (res.code === 0) {
-          this.$message({
-            message: res.codemsg || '操作成功',
-            type: 'success',
-            showClose: true
-          })
-        }
-      })
-    },
-    modifyPwd() {
-      this.$refs.ruleForm.validate((valid) => {
-        if (!valid) {
-          return
-        }
-        modifyPwd(this.ruleForm).then((res) => {
+      if (!this.formReadOnly) {
+        this.$store.dispatch("user/modifyUser", this.formData).then((res)=>{
           if (res.code === 0) {
             this.$message({
               message: res.codemsg || '操作成功',
               type: 'success',
               showClose: true
             })
-            this.resetForm('ruleForm')
           }
-        })
-      })
-    },
-    resetForm(formName) {
-      this.$refs[formName].resetFields();
-    },
-    close() {
-      this.imagecropperShow = false
-    },
-    cropSuccess(resData) {
-      this.imagecropperShow = false
-      this.imagecropperKey = this.imagecropperKey + 1
-      if (resData.code === 0) {
-        this.formData.avatar = resData.response.path
-        this.modifyUser()
-        this.user.avatar = resData.response.path
+        }).catch(() => {})
       }
-      // this.image = resData.files.avatar
     },
+    showCropper() {
+      this.$emit('showCrop', true);
+    },
+    closePanel() {
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'showSettings',
+        value: false
+      })
+      this.formReadOnly = true
+    },
+    modifyForm() {
+      this.formReadOnly = false
+      this.$refs.nicknameInput.$el.querySelector('input').focus();
+    },
+    changeAvator(avatar) {
+      this.user.avatar = avatar
+    }
   }
 }
 </script>
@@ -251,11 +211,21 @@ export default {
     }
   }
 }
-.user-profile-form {
-  margin: 0 20px;
-  width: 85%;
+.user-profile-form-i {
+  text-align: center;
+  margin-bottom: 20px;
 }
 .user-profile-form-btn {
   text-align: right;
 }
+/deep/.el-form-item__label {
+  padding-right: 0px;
+}
+/deep/ .el-input__inner {
+  border-top-style: hidden;
+  border-left-style: hidden;
+  border-right-style: hidden;
+  text-align: center;
+}
+
 </style>

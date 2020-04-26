@@ -28,7 +28,7 @@
       </el-alert>
 
       <div slot="footer" class="dialog-footer" style="line-height:0px;" v-if="state.showBtn">
-        <el-button @click="dialogFormVisible = false" size="mini" v-if="state.toAuth">去授权</el-button>
+        <el-button @click="dialogFormVisible = false" size="mini" v-show="state.toAuth">去授权</el-button>
         <el-button type="primary" @click="closeDialog" size="mini">关闭</el-button>
       </div>
     </el-dialog>
@@ -73,7 +73,7 @@ export default {
         this.state.toAuth = data.to_auth
         that.timer = setInterval(function () {
           if (that.state.percent < that.state.maxPrecent) {
-            that.state.percent = Math.min(parseInt(that.state.percent) + 3, that.state.maxPrecent);
+            that.state.percent = Math.min(parseInt(that.state.percent) + 5, that.state.maxPrecent);
           }
           if (that.state.percent >= 100) {
             that.state.showBtn = true
@@ -83,19 +83,25 @@ export default {
           }
         }, 100);  
       }).then(res => {
-        this.doAsyn(1)
+        this.doAsyn({})
       }).catch(() => {
         this.state.showBtn = true
         this.stopTimer()
       })
     },
-    doAsyn(step) {
-      asynData({step: step}).then( res => {
+    doAsyn(params) {
+      let asynParams = {
+        step: params['step'] || 1,
+        shop_id: params['shop_id'] || 0
+      }
+      asynData(asynParams).then( res => {
         const data = res.response
         this.state.errorMsgs = this.state.errorMsgs.concat(data.error_msg)
         this.state.maxPrecent += this.state.perRate
-        if (typeof(data.continue) !== 'undefined' && data.continue) {
-          this.doAsyn(data.next_step)
+        if (!data.complete) {
+          asynParams['step'] = data.next_step
+          asynParams['shop_id'] = data.shop_id
+          this.doAsyn(asynParams)
         } else {
           this.state.maxPrecent = 100
         }

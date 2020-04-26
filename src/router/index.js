@@ -48,13 +48,14 @@ export const constantRoutes = [
     path: '/',
     component: Layout,
     redirect: '/dashboard',
-    children: [{
-      path: 'dashboard',
-      name: '首页',
-      route:'',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard', affix: true }
-    }]
+    children: [
+      {
+        path: 'dashboard',
+        name: '首页',
+        component: () => import('@/views/dashboard/index'),
+        meta: { title: '首页', icon: 'dashboard', affix: true }
+      }
+    ]
   }
 ]
 
@@ -66,13 +67,11 @@ export const asyncRoutes = [
   {
     path: '/factory',
     component: Layout,
-    redirect: '/factory',
-    name: 'factory',
-    meta: { title: '厂家管理', icon: 'nested' },
+    redirect: '/factory/index',
     children: [
 
       {
-        path: 'factory',
+        path: 'index',
         component: () => import('@/views/factory/index'),
         name: 'factory',
         route: 'Factory',
@@ -84,13 +83,11 @@ export const asyncRoutes = [
   {
     path: '/shop',
     component: Layout,
-    redirect: '/shop',
-    name: 'shop',
-    meta: { title: '店铺管理', icon: 'nested' },
+    redirect: '/shop/index',
     children: [
 
       {
-        path: 'shop',
+        path: 'index',
         component: () => import('@/views/shop/index'),
         name: 'shop',
         meta: { title: '店铺管理', icon: 'nested' }
@@ -99,9 +96,39 @@ export const asyncRoutes = [
   },
 
   {
+    path: '/buyer',
+    component: Layout,
+    redirect: '/buyer/index',
+    children: [
+
+      {
+        path: 'index',
+        component: () => import('@/views/buyer/index'),
+        name: 'buyer',
+        meta: { title: '买家管理', icon: 'nested' }
+      }
+    ]
+  },
+
+  {
+    path: '/order',
+    component: Layout,
+    redirect: '/order/index',
+    children: [
+
+      {
+        path: 'index',
+        component: () => import('@/views/order/index'),
+        name: 'order',
+        meta: { title: '订单管理', icon: 'nested' }
+      }
+    ]
+  },
+
+  {
     path: '/system',
     component: Layout,
-    redirect: '/system/user',
+    redirect: 'noRedirect',
     name: 'system',
     meta: { title: '系统设置', icon: 'nested' },
     children: [

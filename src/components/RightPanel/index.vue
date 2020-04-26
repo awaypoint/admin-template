@@ -22,7 +22,8 @@ export default {
     buttonTop: {
       default: 250,
       type: Number
-    }
+    },
+    visual: false
   },
   data() {
     return {
@@ -58,6 +59,7 @@ export default {
   },
   methods: {
     addEventClick() {
+      return
       window.addEventListener('click', this.closeSidebar)
     },
     closeSidebar(evt) {
@@ -100,7 +102,7 @@ export default {
 
 .rightPanel {
   width: 100%;
-  max-width: 720px;
+  max-width: 420px;
   height: 100vh;
   position: fixed;
   top: 0;

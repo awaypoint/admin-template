@@ -68,7 +68,7 @@ export function removeRole(data) {
 
 /**
  * 准备同步阿里巴巴数据
- * @param {Object}} data 
+ * @param {Object}} data
  */
 export function prepareAsyn(data) {
   return request({
@@ -80,7 +80,7 @@ export function prepareAsyn(data) {
 
 /**
  * 同步阿里巴巴数据
- * @param {Object}} data 
+ * @param {Object}} data
  */
 export function asynData(data) {
   return request({

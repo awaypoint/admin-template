@@ -20,8 +20,9 @@
             prop="username"
             class="login-form-admin"
           >
-            <span class="svg-container svg-container-admin"
-              ><svg-icon icon-class="user" /></span>
+            <span class="svg-container svg-container-admin">
+              <svg-icon icon-class="user" />
+            </span>
             <el-input
               v-model="loginForm.username"
               auto-complete="on"
@@ -31,8 +32,9 @@
             />
           </el-form-item>
           <el-form-item prop="password" class="login-form-pass">
-            <span class="svg-container svg-container-pass"  icon="el-icon-search"
-              ><svg-icon icon-class="password" /></span>
+            <span class="svg-container svg-container-pass" icon="el-icon-search">
+              <svg-icon icon-class="password" />
+            </span>
             <el-input
               :key="passwordType"
               ref="password"
@@ -52,7 +54,7 @@
             class="login-btn"
             type="primary"
             @click.native.prevent="handleLogin"
-            >登录
+          >登录
           </el-button>
         </el-form>
       </el-col>
@@ -61,43 +63,43 @@
 </template>
 
 <script>
-import { validUsername } from "@/utils/validate";
+import { validUsername } from '@/utils/validate'
 
 export default {
   name: "Login",
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error("请输入用户名"));
+        callback(new Error("请输入用户名"))
       } else {
-        callback();
+        callback()
       }
-    };
+    }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 1) {
-        callback(new Error("请输入密码"));
+        callback(new Error("请输入密码"))
       } else {
-        callback();
+        callback()
       }
-    };
+    }
     return {
       title: '巨嗨',
       loginForm: {
-        username: "away1",
-        password: "123456"
+        username: 'away1',
+        password: '123456'
       },
       loginRules: {
         username: [
-          { required: true, trigger: "blur", validator: validateUsername }
+          { required: true, trigger: 'blur', validator: validateUsername }
         ],
         password: [
-          { required: true, trigger: "blur", validator: validatePassword }
+          { required: true, trigger: 'blur', validator: validatePassword }
         ]
       },
       loading: false,
       passwordType: "password",
       redirect: undefined
-    };
+    }
   },
   watch: {
     $route: {
@@ -109,10 +111,10 @@ export default {
   },
   methods: {
     showPwd() {
-      if (this.passwordType === "password") {
-        this.passwordType = ""
+      if (this.passwordType === 'password') {
+        this.passwordType = ''
       } else {
-        this.passwordType = "password"
+        this.passwordType = 'password'
       }
       this.$nextTick(() => {
         this.$refs.password.focus()
@@ -123,16 +125,16 @@ export default {
         if (valid) {
           this.loading = true
           this.$store
-            .dispatch("user/login", this.loginForm)
+            .dispatch('user/login', this.loginForm)
             .then(() => {
-              this.$router.push({ path: this.redirect || "/" })
+              this.$router.push({ path: this.redirect || '/' })
               this.loading = false
             })
             .catch(() => {
               this.loading = false
-            });
+            })
         } else {
-          console.log("error submit!!")
+          console.log('error submit!!')
           return false
         }
       })

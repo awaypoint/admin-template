@@ -27,8 +27,11 @@
           <el-dropdown-item divided @click.native="showRightPannel">
             个人中心
           </el-dropdown-item>
+          <el-dropdown-item @click.native="showResetPwd">
+            重置密码
+          </el-dropdown-item>
           <router-link to="/">
-            <el-dropdown-item>
+            <el-dropdown-item divided>
               首页
             </el-dropdown-item>
           </router-link>
@@ -80,6 +83,9 @@ export default {
         key: 'showSettings',
         value: true
       })
+    },
+    showResetPwd() {
+      this.$emit('showResetPwd')
     }
   }
 }

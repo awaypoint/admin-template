@@ -2,19 +2,23 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" @click="handleAdd" v-show="checkPermission('addUser')">
+        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addUser')" @click="handleAdd">
           添加
         </el-button>
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" @click="handleFilter" v-show="checkPermission('getUsersList')">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getUsersList')" @click="handleFilter">
           查询
+        </el-button>
+        <!-- 这个东西曲线救国 -->
+        <el-button id="clip-btn-id" style="display: none" @click="copy">
+          复制
         </el-button>
       </div>
       <el-input v-model="listQuery.username" placeholder="请输入用户名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.mobile" placeholder="请输入手机号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.role_id" placeholder="角色" clearable class="filter-item" style="width: 150px" @change="handleFilter" filterable>
+      <el-select v-model="listQuery.role_id" placeholder="角色" clearable class="filter-item" style="width: 150px" filterable @change="handleFilter">
         <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
-      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
+      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" placeholder="状态" clearable @change="handleFilter">
         <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
     </div>
@@ -53,8 +57,8 @@
           <el-switch
             v-model="scope.row.status"
             active-color="#13ce66"
-            @change="handleModifyState(scope.row)"
             active-value="1" inactive-value="2"
+            @change="handleModifyState(scope.row)"
           />
 
         </template>
@@ -68,7 +72,7 @@
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('modifyUser')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
+            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delUser')">
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
@@ -85,7 +89,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page_no"
+      :page.sync="listQuery.page"
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
@@ -124,9 +128,10 @@
         <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
         <el-button 
           type="primary" 
-          size="small" 
-          @click="dialogStatus==='create'?submit($event):updateData()"
+          size="small"
           :loading="btnLoding"
+          class="clip-btn"
+          @click="dialogStatus==='create'?submit($event):updateData()"
         >确认</el-button>
       </div>
     </el-dialog>
@@ -167,7 +172,7 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page_no: 1,
+        page: 1,
         page_size: 10,
         mobile: undefined,
         username: undefined,
@@ -180,8 +185,7 @@ export default {
         role_id: '',
         nickname: '',
         mobile: '',
-        status: "1",
-        password: ''
+        status: '1'
       },
       tempCopy: null,
       dialogFormVisible: false,
@@ -202,10 +206,11 @@ export default {
         ]
       },
       statusOptions: [
-        {key:1,label:'启用'},
-        {key:2,label:'禁用'}
+        { key: 1, label:'启用' },
+        { key: 2, label:'禁用' }
       ],
-      btnLoding: false
+      btnLoding: false,
+      copyText: ''
     }
   },
   created() {
@@ -215,6 +220,7 @@ export default {
   },
   methods: {
     checkPermission(check) {
+      return true
       return checkPermission(this.permissions, check)
     },
     handleModifyState(row) {
@@ -253,13 +259,15 @@ export default {
       this.temp = Object.assign({}, this.tempCopy)
     },
     submit(event) {
-      this.$refs['userForm'].validate((valid) => {
+      this.$refs['userForm'].validate( (valid) => {
         if (valid) {
           this.btnLoding = true
-          this.temp.password = randomStr()
           addUser(this.temp).then((res) => {
-            this.$alert('密码: 『' + this.temp.password + '』已复制到剪贴板', '用户『' + this.temp.username + '』创建成功', {
-              confirmButtonText: '确定',
+            const password = res.response.password
+            this.copyText = '用户名:' + this.temp.username + "\n" + '密码:' + password
+            document.getElementById('clip-btn-id').click()
+            this.$alert('密码: 『' + password + '』已复制到剪贴板', '用户『' + this.temp.username + '』创建成功', {
+              confirmButtonText: '去粘贴',
               callback: action => {
                 this.handleFilter()
               }
@@ -269,13 +277,8 @@ export default {
               this.btnLoding = false
             }, 0.5 * 1000)
           }).catch(() => {
-            setTimeout(() => {
-              this.btnLoding = false
-            }, 0.5 * 1000)
+            this.btnLoding = false
           })
-          //复制到剪切板
-          const text = '用户名:' + this.temp.username + "\n" + '密码:' + this.temp.password
-          clip(text, event)
         }
       })
     },
@@ -288,7 +291,7 @@ export default {
     },
     handleUpdate(row) {
       this.dialogStatus = 'update'
-      for(let field in this.temp) {
+      for(const field in this.temp) {
         this.temp[field] = row[field]
       }
       this.dialogFormVisible = true
@@ -338,22 +341,23 @@ export default {
       })
     },
     resetPwd(row, event) {
-      const newPassword = randomStr()
       this.$confirm('此操作将重置用户密码, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
       }).then(() => {
-        resetPwd({ 'id': row.id, 'new_password': newPassword }).then((res) => {
+        resetPwd({ 'id': row.id }).then((res) => {
+          const newPassword = res.response.password
+          this.copyText = '用户名:' + res.response.username + "\n" + '密码:' + newPassword
+          document.getElementById('clip-btn-id').click()
           this.$alert('密码: 『' + newPassword + '』已复制到剪贴板', '用户『' + row.username + '』密码重置成功', {
-            confirmButtonText: '确定',
-            callback: action => {
-              this.handleFilter()
-            }
+            confirmButtonText: '去粘贴'
           })
-        })
+        }).catch(() => {})
       }).catch(() => {})
-      clip(newPassword, event)
+    },
+    copy(event) {
+      clip(this.copyText, event)
     }
   }
 }

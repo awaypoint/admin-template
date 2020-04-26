@@ -2,15 +2,15 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" @click="handleAdd" v-show="checkPermission('addRole')">
+        <el-button class="filter-item pan-btn green-btn" type="" v-show="checkPermission('addRole')" icon="el-icon-plus" @click="handleAdd">
           添加
         </el-button>
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" @click="handleFilter" v-show="checkPermission('getRolesList')">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" v-show="checkPermission('getRolesList')" icon="el-icon-search" @click="handleFilter">
           查询
         </el-button>
       </div>
       <el-input v-model="listQuery.name" placeholder="请输入角色名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
+      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" placeholder="状态" clearable @change="handleFilter">
         <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
     </div>
@@ -22,9 +22,9 @@
 
       fit
       highlight-current-row
+      ref="listTable"
       style="width: 100%;"
       @row-click="handleClick"
-      ref="listTable"
       @expand-change="expandChange"
     >
       <el-table-column type="expand">
@@ -57,20 +57,20 @@
           <el-switch
             v-model="scope.row.status"
             active-color="#13ce66"
+            active-value="1"
+            inactive-value="2"
             @change="handleModifyState(scope.$index,scope.row)"
-            active-value="1" inactive-value="2"
           />
         </template>
       </el-table-column>
 
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width" prop="operate">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateRole')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
+          <el-tooltip class="item" effect="dark" content="编辑" v-show="checkPermission('updateRole')" placement="bottom-end">
+            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delRole')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
+          <el-tooltip class="item" effect="dark" content="删除" v-show="checkPermission('delRole')" placement="bottom-end">
+            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)"></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -79,17 +79,17 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page_no"
+      :page.sync="listQuery.page"
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
 
-    <el-dialog 
-      :close-on-click-modal="false" 
-      :title="textMap[dialogStatus]" 
-      :visible="dialogFormVisible" 
+    <el-dialog
+      :close-on-click-modal="false"
+      :title="textMap[dialogStatus]"
+      :visible="dialogFormVisible"
+      width="650px"
       @close="dialogFormVisible = false"
-      width="650px" 
     >
       <el-form
         ref="dialogForm"
@@ -104,7 +104,7 @@
         </el-form-item>
 
         <el-form-item label="状态：" prop="state">
-          <el-switch v-model="temp.status" active-color="#13ce66" active-value="1" inactive-value="2"/>
+          <el-switch v-model="temp.status" active-color="#13ce66" active-value="1" inactive-value="2" />
         </el-form-item>
         <el-form-item label="描述：" prop="desc">
           <el-input v-model="temp.desc" type="textarea" />
@@ -116,8 +116,8 @@
             <el-checkbox
               v-model="permission.checkedAll"
               :indeterminate="permission.indeterminate"
-              @change="onChangeCheckAll($event, permission)"
               style="margin-right: 30px;"
+              @change="onChangeCheckAll($event, permission)"
             >{{ permission.name }}</el-checkbox>
             <div class="permission-items">
               <el-checkbox-group v-model="permission.selected" style="display: inline-block">
@@ -138,11 +138,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          size="small" 
-          @click="dialogStatus==='create'?submit():updateData()"
+        <el-button
+          type="primary"
+          size="small"
           :loading="btnLoding"
+          @click="dialogStatus==='create'?submit():updateData()"
         >确认</el-button>
       </div>
     </el-dialog>
@@ -169,11 +169,6 @@ export default {
       return statusMap[status]
     }
   },
-  computed: {
-    ...mapGetters([
-      'permissions'
-    ])
-  },
   data() {
     return {
       permissionOption: this.$store.getters.buttons,
@@ -185,7 +180,7 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page_no: 1,
+        page: 1,
         page_size: 10,
         name: '',
         status: ''
@@ -194,7 +189,7 @@ export default {
         id: '',
         name: '',
         desc: '',
-        status: "1",
+        status: '1',
         permissions: []
       },
       tempCopy: null,
@@ -212,10 +207,15 @@ export default {
         create: '添加角色'
       },
       statusOptions: [
-        {key:1,label:'启用'},
-        {key:2,label:'禁用'}
+        { key: 1, label: '启用' },
+        { key: 2, label: '禁用' }
       ]
     }
+  },
+  computed: {
+    ...mapGetters([
+      'permissions'
+    ])
   },
   created() {
     this.tempCopy = Object.assign({}, this.temp)
@@ -234,12 +234,12 @@ export default {
     expandChange(row, expandedRows) {
       row.expandLoading = true
       if (expandedRows.indexOf(row) > -1) {
-        getRolePermission({'id': row.id}).then(res => {
+        getRolePermission({ 'id': row.id }).then(res => {
           row.permissions = res.response
           this.setRowPermissions(res.response, row)
           setTimeout(() => {
             row.expandLoading = false
-          }, 500);
+          }, 500)
         }).catch(() => {})
       }
     },
@@ -271,7 +271,7 @@ export default {
       const allPerIds = []
       permission.actionsOptions.forEach(value => {
         allPerIds.push(value.id)
-      });
+      })
       Object.assign(permission, {
         selected: checked ? allPerIds : [],
         indeterminate: false,
@@ -293,7 +293,6 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.page_no = 1
       this.getList()
     },
     handleModifyState(index, row) {
@@ -334,11 +333,11 @@ export default {
     },
     handleUpdate(row) {
       this.dialogStatus = 'update'
-      for(let field in this.temp) {
+      for (const field in this.temp) {
         this.temp[field] = row[field]
       }
       if (row.permissions.length === 0) {
-        getRolePermission({'id': row.id}).then(res => {
+        getRolePermission({ 'id': row.id }).then(res => {
           this.permissions2Menus(res.response)
         }).catch(() => {})
       } else {
@@ -397,7 +396,7 @@ export default {
     createPermissions() {
       this.temp.permissions = []
       this.permissionList.forEach(items => {
-        let currentSelected = items.selected
+        const currentSelected = items.selected
         if (items.checkedAll || items.indeterminate) {
           currentSelected.unshift(items.id)
         }
@@ -411,14 +410,14 @@ export default {
         this.permissionList[key].indeterminate = false
         if (rolePermissions.indexOf(items.id) > -1) {
           this.permissionList[key].indeterminate = true
-          let currentSelected = []
-          for(let i in items.actionsOptions) {
-            if(rolePermissions.indexOf(items.actionsOptions[i].id) > -1) {
+          const currentSelected = []
+          for (const i in items.actionsOptions) {
+            if (rolePermissions.indexOf(items.actionsOptions[i].id) > -1) {
               currentSelected.push(items.actionsOptions[i].id)
             }
           }
           this.permissionList[key].selected = currentSelected
-          if(currentSelected.length === items.actionsOptions.length) {
+          if (currentSelected.length === items.actionsOptions.length) {
             this.permissionList[key].checkedAll = true
             this.permissionList[key].indeterminate = false
           }
@@ -426,17 +425,18 @@ export default {
       })
     },
     setRowPermissions(rolePermissions, row) {
+      row.permissionsList = []
       if (rolePermissions.length > 0) {
         this.permissionList.forEach((items, key) => {
           if (rolePermissions.indexOf(items.id) > -1) {
-            let tmp = {
+            const tmp = {
               id: items.id,
               name: items.name,
               childs: []
             }
-            for(let i in items.actionsOptions) {
-              if(rolePermissions.indexOf(items.actionsOptions[i].id) > -1) {
-                let childTmp = {
+            for (const i in items.actionsOptions) {
+              if (rolePermissions.indexOf(items.actionsOptions[i].id) > -1) {
+                const childTmp = {
                   id: items.actionsOptions[i].id,
                   name: items.actionsOptions[i].name
                 }
@@ -451,7 +451,7 @@ export default {
     modifyRole(data) {
       updateRole(data).then(res => {
         this.handleFilter()
-      }).catch(()=>{
+      }).catch(() => {
         this.handleFilter()
       })
     }

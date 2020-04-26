@@ -864,7 +864,7 @@ export default {
   display: block;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  z-index: 10000;
+  z-index: 50000;
   top: 0;
   bottom: 0;
   left: 0;
