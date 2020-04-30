@@ -214,6 +214,7 @@ export default {
 .user-profile-form-i {
   text-align: center;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 .user-profile-form-btn {
   text-align: right;

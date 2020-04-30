@@ -72,20 +72,55 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyFactory ref="modifyFactoryDialog" @handleFilter="handleFilter"></modifyFactory>
+
+    <el-dialog
+      :close-on-click-modal="false"
+      :title="textMap[dialogStatus]"
+      :visible.sync="dialogFormVisible"
+      width="550px"
+      ref="childForm"
+    >
+      <el-form
+        ref="dialogForm"
+        :rules="rules"
+        :model="temp"
+        label-position="right"
+        label-width="90px"
+        class="dialog-form-cls"
+      >
+        <el-form-item label="厂家名称" prop="name">
+          <el-input v-model="temp.name"/>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-switch v-model="temp.status" active-color="#13ce66" active-value="1" inactive-value="2"/>
+        </el-form-item>
+        <el-form-item label="描述" prop="desc">
+          <el-input v-model="temp.desc" type="textarea"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
+        <el-button 
+          type="primary" 
+          size="small" 
+          :loading="btnLoding"
+          @click="dialogStatus==='create'?submit($event):updateData()"
+        >确认</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getFactoryList, updateFactory, delFactory } from '@/api/factory'
+import { getList, add, update, del } from '@/api/factory'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
-import modifyFactory from './components/modify';
 
 export default {
   name: 'Factory',
-  components: { Pagination, modifyFactory },
+  components: { Pagination },
   data() {
     return {
       tableKey: 0,
@@ -99,18 +134,39 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      temp: {
+        id: undefined,
+        name: '',
+        status: '1',
+        desc: ''
+      },
+      tempCopy: null,
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '编辑厂家',
+        create: '添加厂家'
+      },
+      rules: {
+        name: [
+          { required: true, trigger: 'blur', message: '请填写厂家名称' }
+        ]
+      },
+      statusOptions: [
+        { key: 1, label: '启用'},
+        { key: 2, label: '禁用'}
+      ],
+      btnLoding: false
     }
   },
   computed: {
     ...mapGetters([
       'permissions'
-    ]),
-    statusOptions() {
-      return this.$store.state.factory.statusOptions
-    }
+    ])
   },
   created() {
+    this.tempCopy = Object.assign({}, this.temp)
     this.getList()
   },
   methods: {
@@ -122,11 +178,18 @@ export default {
       this.getList()
     },
     handleAdd() {
-      this.$refs.modifyFactoryDialog.showDialog('create')
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.resetForm('dialogForm')
+      })
     },
     handleUpdate(row) {
-      this.$store.dispatch('factory/setRow', row)
-      this.$refs.modifyFactoryDialog.showDialog('update')
+      this.dialogStatus = 'update'
+      for(let field in this.temp) {
+        this.temp[field] = row[field]
+      }
+      this.dialogFormVisible = true
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
@@ -134,20 +197,15 @@ export default {
       this.handleFilter()
     },
     handleModifyState(row) {
-      updateFactory({ 'id': row.id, 'status': row.status }).then((res) => {
-        this.$message({
-          message: res.codemsg || '操作成功',
-          type: 'success',
-          showClose: true
-        })
-        this.handleFilter()
-      }).catch(() => {
-        this.handleFilter()
-      })
+      const upData = {
+        'id': row.id,
+        'status': row.status
+      }
+      this.modifyFactory(upData, false)
     },
     getList() {
       this.listLoading = true
-      getFactoryList(this.listQuery).then(res => {
+      getList(this.listQuery).then(res => {
         this.list = res.response.rows
         this.total = res.response.total
         setTimeout(() => {
@@ -159,21 +217,79 @@ export default {
         }, 0.5 * 1000)
       })
     },
+    resetForm(formName) {
+      if (this.$refs[formName] === undefined) {
+        return false
+      }
+      this.$refs[formName].resetFields()
+      this.temp = Object.assign({}, this.tempCopy)
+    },
+    submit(event) {
+      this.$refs['dialogForm'].validate((valid) => {
+        if (valid) {
+          this.btnLoding = true
+          add(this.temp).then((res) => {
+            this.$message({
+              message: res.codemsg || '操作成功',
+              type: 'success',
+              showClose: true
+            })
+            setTimeout(() => {
+              this.dialogFormVisible = false
+              this.btnLoding = false
+              this.handleFilter()
+            }, 0.5 * 1000)
+          }).catch(() => {
+            setTimeout(() => {
+              this.btnLoding = false
+            }, 0.5 * 1000)
+          })
+        }
+      })
+    },
+    updateData() {
+      this.$refs['dialogForm'].validate((valid) => {
+        if (valid) {
+          this.btnLoding = true
+          this.modifyFactory(this.temp, true)
+        }
+      })
+    },
     handleDelete(id) {
       this.$confirm('此操作将永久删除该厂家, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delFactory({ 'id': id }).then((res) => {
+        del({ 'id': id }).then((res) => {
           this.$message({
             message: res.codemsg || '操作成功',
             type: 'success',
             showClose: true
           })
           this.handleFilter()
-        }).catch(() => {})
+        })
       }).catch(() => {})
+    },
+    modifyFactory(upData, isDialog) {
+      update(upData).then((res) => {
+        this.$message({
+          message: res.codemsg || '操作成功',
+          type: 'success',
+          showClose: true
+        })
+        if (isDialog) {
+          this.dialogFormVisible = false
+          this.btnLoding = false
+        }
+        this.handleFilter()
+      }).catch(() => {
+        if (!isDialog) {
+          this.handleFilter()
+        } else {
+          this.btnLoding = false
+        }
+      })
     }
   }
 }

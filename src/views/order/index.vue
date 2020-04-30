@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getFactoryList')" @click="handleFilter">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getOrderList')" @click="handleFilter">
           查询
         </el-button>
       </div>
@@ -46,7 +46,7 @@
       <el-table-column label="买家" min-width="160px" align="center">
         <template slot-scope="scope">
           <img src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
-          <el-tag type="warning">{{ scope.row.to_full_name }}</el-tag>
+          <el-tag type="">{{ scope.row.to_full_name }}</el-tag>
           <span>{{ scope.row.buyer_login_id }}</span>
         </template>
       </el-table-column>
@@ -68,10 +68,10 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateFactory')">
+          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateOrder')">
             <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="打印订单" placement="bottom-end" v-show="checkPermission('delFactroy')">
+          <el-tooltip class="item" effect="dark" content="打印订单" placement="bottom-end" v-show="checkPermission('printOrder')">
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
             </el-button>
           </el-tooltip>
@@ -86,55 +86,20 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-
-    <el-dialog
-      :close-on-click-modal="false"
-      :title="textMap[dialogStatus]"
-      :visible.sync="dialogFormVisible"
-      width="550px"
-      ref="childForm"
-    >
-      <el-form
-        ref="dialogForm"
-        :rules="rules"
-        :model="temp"
-        label-position="right"
-        label-width="90px"
-        class="dialog-form-cls"
-      >
-        <el-form-item label="厂家名称" prop="name">
-          <el-input v-model="temp.name"/>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="temp.status" active-color="#13ce66" active-value="1" inactive-value="2"/>
-        </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="temp.desc" type="textarea"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          size="small" 
-          :loading="btnLoding"
-          @click="dialogStatus==='create'?submit($event):updateData()"
-        >确认</el-button>
-      </div>
-    </el-dialog>
-
+    <modifyOrderDialog ref="modifyOrderDialog" @handleFilter="handleFilter"></modifyOrderDialog>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getOrderList, getOrderDetail } from '@/api/order'
+import { getOrderList } from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
+import modifyOrderDialog from './components/modify';
 
 export default {
   name: 'Order',
-  components: { Pagination },
+  components: { Pagination, modifyOrderDialog },
   data() {
     return {
       tableKey: 0,
@@ -148,39 +113,19 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      },
-      temp: {
-        id: undefined,
-        name: '',
-        status: '1',
-        desc: ''
-      },
-      tempCopy: null,
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '编辑订单',
-      },
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写厂家名称' }
-        ]
-      },
-      typeOptions: [
-        { key: 1, label: '正常'},
-        { key: 2, label: '刷单'}
-      ],
-      typeMap: {
-        1: '正常',
-        2: '刷单'
-      },
-      btnLoding: false
+      }
     }
   },
   computed: {
     ...mapGetters([
       'permissions'
-    ])
+    ]),
+    typeOptions() {
+      return this.$store.state.order.typeOptions
+    },
+    typeMap() {
+      return this.$store.state.order.typeMap
+    },
   },
   created() {
     this.tempCopy = Object.assign({}, this.temp)
@@ -188,25 +133,15 @@ export default {
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
+      this.listQuery.page = 1
       this.getList()
     },
-    handleAdd() {
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.resetForm('dialogForm')
-      })
-    },
     handleUpdate(row) {
-      this.dialogStatus = 'update'
-      for(let field in this.temp) {
-        this.temp[field] = row[field]
-      }
-      this.dialogFormVisible = true
+      this.$store.dispatch('order/setRow', row)
+      this.$refs.modifyOrderDialog.showDialog('update')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
@@ -234,44 +169,6 @@ export default {
         }, 0.5 * 1000)
       })
     },
-    resetForm(formName) {
-      if (this.$refs[formName] === undefined) {
-        return false
-      }
-      this.$refs[formName].resetFields()
-      this.temp = Object.assign({}, this.tempCopy)
-    },
-    submit(event) {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          add(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
-            setTimeout(() => {
-              this.dialogFormVisible = false
-              this.btnLoding = false
-              this.handleFilter()
-            }, 0.5 * 1000)
-          }).catch(() => {
-            setTimeout(() => {
-              this.btnLoding = false
-            }, 0.5 * 1000)
-          })
-        }
-      })
-    },
-    updateData() {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          this.modifyFactory(this.temp, true)
-        }
-      })
-    },
     handleDelete(id) {
       this.$confirm('此操作将永久删除该厂家, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -288,35 +185,15 @@ export default {
         })
       }).catch(() => {})
     },
-    modifyFactory(upData, isDialog) {
-      update(upData).then((res) => {
-        this.$message({
-          message: res.codemsg || '操作成功',
-          type: 'success',
-          showClose: true
-        })
-        if (isDialog) {
-          this.dialogFormVisible = false
-          this.btnLoding = false
-        }
-        this.handleFilter()
-      }).catch(() => {
-        if (!isDialog) {
-          this.handleFilter()
-        } else {
-          this.btnLoding = false
-        }
-      })
-    },
     getSummaries(params) {
       const { columns, data } = params
-      const sums = [ '合计', 333, 222 ]
+      const sums = [ '总计', 333, 222 ]
       return sums
     }
   }
 }
 </script>
-<style>
+<style lang="scss" scoped>
 .wangwang-cls {
   vertical-align: middle;
   margin-right: 5px;

@@ -15,7 +15,7 @@
         <!-- <el-tooltip content="Global Size" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip> -->
-        <asyn id="asyn-btn" class="right-menu-item hover-effect"/>
+        <asyn v-show="checkPermission('asynData')" id="asyn-btn" class="right-menu-item hover-effect"/>
 
       </template>
       <el-dropdown class="avatar-container" trigger="click">
@@ -52,7 +52,7 @@ import Screenfull from '@/components/Screenfull'
 import Asyn from '@/components/AsynBtn'
 // import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
-import { addClass, removeClass } from '@/utils'
+import { addClass, removeClass, checkPermission } from '@/utils'
 
 export default {
   components: {
@@ -67,10 +67,14 @@ export default {
     ...mapGetters([
       'sidebar',
       'avatar',
-      'device'
+      'device',
+      'permissions'
     ])
   },
   methods: {
+    checkPermission(check) {
+      return checkPermission(this.permissions, check)
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },

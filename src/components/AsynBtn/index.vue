@@ -28,7 +28,7 @@
       </el-alert>
 
       <div slot="footer" class="dialog-footer" style="line-height:0px;" v-if="state.showBtn">
-        <el-button @click="dialogFormVisible = false" size="mini" v-show="state.toAuth">去授权</el-button>
+        <el-button size="mini" v-show="state.toAuth" @click="gotoShopList" >去授权</el-button>
         <el-button type="primary" @click="closeDialog" size="mini">关闭</el-button>
       </div>
     </el-dialog>
@@ -118,6 +118,10 @@ export default {
     closeDialog() {
       this.dialogFormVisible = false
       this.stopTimer()
+    },
+    gotoShopList() {
+      this.$router.push('/shop/index')
+      this.dialogFormVisible = false
     }
   }
 }

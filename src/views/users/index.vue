@@ -248,7 +248,7 @@ export default {
       }, 0.5 * 1000)
     },
     handleFilter() {
-      this.listQuery.page_no = 1
+      this.listQuery.page = 1
       this.getList()
     },
     resetForm(formName) {

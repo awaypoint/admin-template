@@ -60,7 +60,7 @@
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateBuyer')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
+            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row, 'update')"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="订单列表" placement="bottom-end" v-show="checkPermission('getOrderList')">
             <el-button icon="el-icon-s-order" size="mini" type="primary">
@@ -77,63 +77,30 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-
-    <el-dialog 
-      :close-on-click-modal="false" 
-      :title="textMap[dialogStatus]" 
-      :visible.sync="dialogFormVisible" 
-      width="550px" 
-      ref="childForm"
-    >
-      <el-form
-        ref="dialogForm"
-        :model="temp"
-        label-position="right"
-        label-width="90px"
-        class="dialog-form-cls"
-      >
-        <el-form-item label="买家名称" prop="buyer_login_id">
-          <el-input v-model="temp.buyer_login_id" readonly/>
-        </el-form-item>
-        <el-form-item label="买家id" prop="buyer_member_id">
-          <el-input v-model="temp.buyer_member_id" readonly/>
-        </el-form-item>
-        <el-form-item label="性别" prop="sex">
-          <el-radio v-model="temp.sex" label="1">男</el-radio>
-          <el-radio v-model="temp.sex" label="2">女</el-radio>
-          <el-radio v-model="temp.sex" label="3">未知</el-radio>
-        </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="temp.desc" type="textarea"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          size="small" 
-          @click="updateData()"
-          :loading="btnLoding"
-        >确认</el-button>
-      </div>
-    </el-dialog>
-
+    <modifyBuyerDialog ref="modifyBuyerDialog" @handleFilter="handleFilter"></modifyBuyerDialog>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getBuyerList, updateBuyer } from '@/api/buyer'
+import { getBuyerList } from '@/api/buyer'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
+import modifyBuyerDialog from './components/modify';
 
 export default {
   name: 'Buyer',
-  components: { Pagination },
+  components: { Pagination, modifyBuyerDialog },
   computed: {
     ...mapGetters([
       'permissions',
-    ])
+    ]),
+    typeList() {
+      return this.$store.state.buyer.typeList
+    },
+    typeMap() {
+      return this.$store.state.buyer.typeMap
+    }
   },
   data() {
     return {
@@ -148,28 +115,6 @@ export default {
         times: [],
         order_by: undefined,
         sort_by: undefined
-      },
-      temp: {
-        id: undefined,
-        buyer_member_id: '',
-        buyer_login_id: '',
-        sex: '',
-        desc: ''
-      },
-      tempCopy: null,
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '编辑买家',
-        create: '添加买家'
-      },
-      typeList: [
-        { id: '1', name: '普通店铺'},
-        { id: '2', name: '1688店铺'}
-      ],
-      typeMap: {
-        '1': '普通店铺',
-        '2': '1688店铺'
       },
       pickerOptions: {
         shortcuts: [{
@@ -197,28 +142,23 @@ export default {
             picker.$emit('pick', [start, end]);
           }
         }]
-      },
-      btnLoding: false
+      }
     }
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
     this.getList()
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
+      this.listQuery.page = 1
       this.getList()
     },
-    handleUpdate(row) {
-      this.dialogStatus = 'update'
-      for(let field in this.temp) {
-        this.temp[field] = row[field]
-      }
-      this.dialogFormVisible = true
+    handleUpdate(row, status) {
+      this.$store.dispatch('buyer/setRow', row)
+      this.$refs.modifyBuyerDialog.showDialog(status)
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
@@ -238,43 +178,15 @@ export default {
           this.listLoading = false
         }, 0.5 * 1000)
       })
-    },
-    updateData() {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          this.updateBuyer(this.temp, true)
-        }
-      })
-    },
-    updateBuyer(upData, isDialog) {
-      updateBuyer(upData).then((res) => {
-        this.$message({
-          message: res.codemsg || '操作成功',
-          type: 'success',
-          showClose: true
-        })
-        if (isDialog) {
-          this.dialogFormVisible = false
-          this.btnLoding = false
-        }
-        this.handleFilter()
-      }).catch(() => {
-        if (!isDialog) {
-          this.handleFilter()
-        } else {
-          this.btnLoding = false
-        }
-      })
     }
   }
 }
 </script>
-<style>
-.el-range-input  {
+<style lang="scss" scoped>
+/deep/.el-range-input  {
   vertical-align: top;
 }
-.el-range-separator {
+/deep/.el-range-separator {
   vertical-align: top;
 }
 .wangwang-cls {

@@ -75,62 +75,20 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-
-    <el-dialog 
-      :close-on-click-modal="false" 
-      :title="textMap[dialogStatus]" 
-      :visible.sync="dialogFormVisible" 
-      width="550px" 
-      ref="childForm"
-    >
-      <el-form
-        ref="dialogForm"
-        :rules="rules"
-        :model="temp"
-        label-position="right"
-        label-width="90px"
-        class="dialog-form-cls"
-      >
-        <el-form-item label="店铺名称" prop="name">
-          <el-input v-model="temp.name"/>
-        </el-form-item>
-        <el-form-item label="店铺类型" prop="role_id">
-          <el-select v-model="temp.type" placeholder="请选择" clearable style="width:100%">
-            <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="temp.desc" type="textarea"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          size="small" 
-          @click="dialogStatus==='create'?submit($event):updateData()"
-          :loading="btnLoding"
-        >确认</el-button>
-      </div>
-    </el-dialog>
-
+    <modifyShopDialog ref="modifyShopDialog" @handleFilter="handleFilter"></modifyShopDialog>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getShopList, addShop, updateShop, delShop } from '@/api/shop'
+import { getShopList, delShop } from '@/api/shop'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
+import modifyShopDialog from './components/modify';
 
 export default {
   name: 'Shop',
-  components: { Pagination },
-  computed: {
-    ...mapGetters([
-      'permissions',
-    ])
-  },
+  components: { Pagination, modifyShopDialog },
   data() {
     return {
       tableKey: 0,
@@ -144,43 +102,25 @@ export default {
         type: undefined,
         order_by: undefined,
         sort_by: undefined
-      },
-      temp: {
-        id: undefined,
-        name: '',
-        type: '',
-        desc: ''
-      },
-      tempCopy: null,
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '编辑店铺',
-        create: '添加店铺'
-      },
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写店铺名称' }
-        ]
-      },
-      typeList: [
-        { id: '1', name: '普通店铺'},
-        { id: '2', name: '1688店铺'}
-      ],
-      typeMap: {
-        '1': '普通店铺',
-        '2': '1688店铺'
-      },
-      btnLoding: false
+      }
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'permissions',
+    ]),
+    typeList() {
+      return this.$store.state.shop.typeList
+    },
+    typeMap() {
+      return this.$store.state.shop.typeMap
     }
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
     this.getList()
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     checkAuth(row) {
@@ -193,21 +133,15 @@ export default {
       return true
     },
     handleFilter() {
+      this.listQuery.page = 1
       this.getList()
     },
     handleAdd() {
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.resetForm('dialogForm')
-      })
+      this.$refs.modifyShopDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.dialogStatus = 'update'
-      for(let field in this.temp) {
-        this.temp[field] = row[field]
-      }
-      this.dialogFormVisible = true
+      this.$store.dispatch('shop/setRow', row)
+      this.$refs.modifyShopDialog.showDialog('update')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
@@ -228,44 +162,6 @@ export default {
         }, 0.5 * 1000)
       })
     },
-    resetForm(formName) {
-      if (this.$refs[formName] === undefined) {
-        return false
-      }
-      this.$refs[formName].resetFields()
-      this.temp = Object.assign({}, this.tempCopy)
-    },
-    submit(event) {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          addShop(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
-            setTimeout(() => {
-              this.dialogFormVisible = false
-              this.btnLoding = false
-              this.handleFilter()
-            }, 0.5 * 1000)
-          }).catch(() => {
-            setTimeout(() => {
-              this.btnLoding = false
-            }, 0.5 * 1000)
-          })
-        }
-      })
-    },
-    updateData() {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          this.modifyShop(this.temp, true)
-        }
-      })
-    },
     handleDelete(id) {
       this.$confirm('此操作将永久删除该店铺, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -281,26 +177,6 @@ export default {
           this.handleFilter()
         })
       }).catch(() => {})
-    },
-    modifyShop(upData, isDialog) {
-      updateShop(upData).then((res) => {
-        this.$message({
-          message: res.codemsg || '操作成功',
-          type: 'success',
-          showClose: true
-        })
-        if (isDialog) {
-          this.dialogFormVisible = false
-          this.btnLoding = false
-        }
-        this.handleFilter()
-      }).catch(() => {
-        if (!isDialog) {
-          this.handleFilter()
-        } else {
-          this.btnLoding = false
-        }
-      })
     },
     gotoAuth(url) {
       window.open(url, '_blank')

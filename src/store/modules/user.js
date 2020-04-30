@@ -10,7 +10,11 @@ const getDefaultState = () => {
     roleName: '',
     username: '',
     mobile: '',
-    guided: false
+    guided: false,
+    statusOptions: [
+      { key: 1, label:'启用' },
+      { key: 2, label:'禁用' }
+    ]
   }
 }
 
@@ -99,6 +103,7 @@ const actions = {
 
   // remove token
   resetToken({ commit }) {
+    const that = this
     return new Promise(resolve => {
       removeToken() // must remove  token  first
       commit('RESET_STATE')

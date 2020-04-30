@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function getList(data) {
+export function getFactoryList(data) {
   return request({
     url: 'getFactoryList',
     method: 'post',
@@ -8,7 +8,7 @@ export function getList(data) {
   })
 }
 
-export function add(data) {
+export function addFactory(data) {
   return request({
     url: 'addFactory',
     method: 'post',
@@ -16,7 +16,7 @@ export function add(data) {
   })
 }
 
-export function update(data) {
+export function updateFactory(data) {
   return request({
     url: 'updateFactory',
     method: 'post',
@@ -24,7 +24,7 @@ export function update(data) {
   })
 }
 
-export function del(data) {
+export function delFactory(data) {
   return request({
     url: 'delFactroy',
     method: 'post',

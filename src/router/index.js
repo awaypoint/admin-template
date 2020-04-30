@@ -75,7 +75,7 @@ export const asyncRoutes = [
         component: () => import('@/views/factory/index'),
         name: 'factory',
         route: 'Factory',
-        meta: { title: '厂家管理', icon: 'nested' }
+        meta: { title: '厂家管理', icon: 'factory' }
       }
     ]
   },
@@ -90,7 +90,8 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/shop/index'),
         name: 'shop',
-        meta: { title: '店铺管理', icon: 'nested' }
+        route: 'Shop',
+        meta: { title: '店铺管理', icon: 'shop' }
       }
     ]
   },
@@ -105,7 +106,23 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/buyer/index'),
         name: 'buyer',
-        meta: { title: '买家管理', icon: 'nested' }
+        route: 'Buyer',
+        meta: { title: '买家管理', icon: 'peoples' }
+      }
+    ]
+  },
+
+  {
+    path: '/product',
+    component: Layout,
+    redirect: '/product/index',
+    children: [
+
+      {
+        path: 'index',
+        component: () => import('@/views/product/index'),
+        name: 'product',
+        meta: { title: '产品管理', icon: 'theme' }
       }
     ]
   },
@@ -120,7 +137,31 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/order/index'),
         name: 'order',
-        meta: { title: '订单管理', icon: 'nested' }
+        route: 'Order',
+        meta: { title: '订单管理', icon: 'money' }
+      }
+    ]
+  },
+
+  {
+    path: '/store',
+    component: Layout,
+    redirect: 'noRedirect',
+    name: 'store',
+    meta: { title: '库存管理', icon: 'money' },
+    children: [
+
+      {
+        path: 'stockin',
+        component: () => import('@/views/stockin/index'),
+        name: 'stockin',
+        meta: { title: '入库', icon: 'money' }
+      },
+      {
+        path: 'stock',
+        component: () => import('@/views/stock/index'),
+        name: 'stock',
+        meta: { title: '仓库列表', icon: 'money' }
       }
     ]
   },
@@ -130,22 +171,22 @@ export const asyncRoutes = [
     component: Layout,
     redirect: 'noRedirect',
     name: 'system',
-    meta: { title: '系统设置', icon: 'nested' },
+    meta: { title: '系统设置', icon: 'setting' },
     children: [
 
       {
         path: 'user',
-        component: () => import('@/views/system/users/index'),
+        component: () => import('@/views/users/index'),
         name: 'user',
         route: 'Users',
-        meta: { title: '用户管理', icon: 'nested' }
+        meta: { title: '用户管理', icon: 'user' }
       },
       {
         path: 'role',
-        component: () => import('@/views/system/roles/index'),
+        component: () => import('@/views/roles/index'),
         name: 'roles',
         route: 'Roles',
-        meta: { title: '角色管理', icon: 'nested' }
+        meta: { title: '角色管理', icon: 'role' }
       }
     ]
   },

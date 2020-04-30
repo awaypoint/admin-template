@@ -1,6 +1,9 @@
 <template>
   <div class="dashboard-container">
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
+    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+      <line-chart :chart-data="lineChartData" />
+    </el-row>
   </div>
 </template>
 
@@ -11,6 +14,7 @@ import Driver from 'driver.js' // import driver.js
 import 'driver.js/dist/driver.min.css' // import driver.js css
 import steps from './steps'
 import PanelGroup from './components/PanelGroup'
+import LineChart from './components/LineChart'
 
 const lineChartData = {
   newVisitis: {
@@ -35,6 +39,7 @@ export default {
   name: 'Dashboard',
   components: {
     PanelGroup,
+    LineChart
   },
   computed: {
     ...mapGetters([
@@ -54,6 +59,7 @@ export default {
         closeBtnText: '关闭',            // Text on the close button for this step
         nextBtnText: '下一项',              // Next button text for this step
         prevBtnText: '上一项', 
+        allowClose: false
       }
       const driver = new Driver(driverOptions)
       driver.defineSteps(steps)
