@@ -110,7 +110,7 @@
         class="userFormCls"
       >
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="temp.username" :disabled="dialogStatus==='update'"/>
+          <el-input v-model="temp.username" :readonly="dialogStatus==='update'"/>
         </el-form-item>
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="temp.mobile" />

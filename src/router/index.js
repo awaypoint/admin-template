@@ -152,17 +152,30 @@ export const asyncRoutes = [
     children: [
 
       {
+        path: 'stock',
+        component: () => import('@/views/stock/index'),
+        name: 'stock',
+        meta: { title: '仓库列表', icon: 'money' }
+      },
+      {
         path: 'stockin',
         component: () => import('@/views/stockin/index'),
         name: 'stockin',
         meta: { title: '入库', icon: 'money' }
       },
       {
-        path: 'stock',
-        component: () => import('@/views/stock/index'),
-        name: 'stock',
-        meta: { title: '仓库列表', icon: 'money' }
+        path: 'stockout',
+        component: () => import('@/views/stockout/index'),
+        name: 'stockout',
+        meta: { title: '出库', icon: 'money' }
+      },
+      {
+        path: 'replenishment',
+        component: () => import('@/views/replenishment/index'),
+        name: 'replenishment',
+        meta: { title: '补货列表', icon: 'money' }
       }
+
     ]
   },
 

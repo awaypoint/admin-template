@@ -6,6 +6,7 @@
       :visible.sync="dialogShow"
       width="550px"
       ref="childForm"
+      @close="closeDialog"
     >
       <el-form
         ref="dialogForm"

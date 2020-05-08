@@ -17,6 +17,7 @@
   "dependencies": {
     "axios": "0.18.1",
     "driver.js": "0.9.5",
+    "dropzone": "^5.7.0",
     "echarts": "^4.7.0",
     "element-ui": "2.13.0",
     "fuse.js": "3.4.4",

@@ -31,3 +31,11 @@ export function delShop(data) {
     data
   })
 }
+
+export function getShopGroupCombo(data) {
+  return request({
+    url: 'getShopGroupCombo',
+    method: 'post',
+    data
+  })
+}

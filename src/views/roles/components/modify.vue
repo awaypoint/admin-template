@@ -5,6 +5,7 @@
       :title="textMap[dialogStatus]"
       :visible="dialogShow"
       width="650px"
+      @close="closeDialog"
     >
       <el-form
         ref="dialogForm"

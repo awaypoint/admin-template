@@ -39,3 +39,11 @@ export function delProduct(data) {
     data
   })
 }
+
+export function getSkuProducts(data) {
+  return request({
+    url: 'getSkuProducts',
+    method: 'post',
+    data
+  })
+}

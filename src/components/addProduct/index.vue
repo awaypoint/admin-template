@@ -2,7 +2,7 @@
   <div>
     <el-tooltip class="item" effect="dark" content="添加商品" placement="bottom-end">
       <el-popover
-        placement="left"
+        placement="right"
         width="600"
         trigger="manual"
         v-model="visible"
@@ -17,24 +17,57 @@
               v-model="listQuery.query"
               style="width: 200px;"
               size="mini"
+              @keyup.enter.native="handleFilter"
             >
               <i slot="prefix" class="el-input__icon el-icon-search"></i>
             </el-input>
           </div>
-          <el-table :data="gridData" width="100%">
-            <el-table-column width="100" property="date" label="货号"></el-table-column>
-            <el-table-column width="100" property="name" label="sku"></el-table-column>
-            <el-table-column min-width="300" property="address" label="产品名称"></el-table-column>
+          <el-table 
+            ref="addProductTableRef"
+            v-loading="listLoading"
+            :data="gridData"
+            width="100%"
+            @selection-change="handleSelect"
+          >
+            <el-table-column
+              type="selection"
+              width="55">
+            </el-table-column>
+            <el-table-column width="250" property="address" label="产品名称" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>{{ scope.row.subject }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="100" label="货号">
+              <template slot-scope="scope">
+                <span>{{ scope.row.cargo_number }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="160" property="name" label="sku">
+              <template slot-scope="scope">
+                <el-tag 
+                  v-for="(attr, index) in scope.row.attr_arr"
+                  :key="index"
+                  effect="dark"
+                  :type="tagTypeArr[index % 5]"
+                  style="margin-right: 5px;"
+                >
+                {{ attr }}
+                </el-tag>
+              </template>
+            </el-table-column>
           </el-table>
           <pagination
             v-show="total>0"
             :total="total"
             :page.sync="listQuery.page"
             :limit.sync="listQuery.page_size"
-            :pager-count="5"
             layout="total, prev, pager, next"
-            @pagination="handleFilter"
+            @pagination="getList"
           />
+          <div class="add-product-insert-btn">
+            <el-button size="mini" type="primary" @click="choose">选好了</el-button> 
+          </div>
         </div>
         <el-button slot="reference" circle size="mini" :icon="btnIcon" @click="click" class="add-product-btn-cls"></el-button>
       </el-popover>
@@ -43,7 +76,7 @@
 </template>
 
 <script>
-import { prepareAsyn, asynData } from '@/api/system'
+import { getSkuProducts } from '@/api/product'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -51,46 +84,87 @@ export default {
   components: { Pagination },
   data() {
     return {
+      listLoading: false,
       visible: false,
       btnIcon: 'el-icon-s-goods',
-      total: 5,
+      total: 0,
       listQuery: {
         page: 1,
-        page_size: 10,
+        page_size: 8,
         query: undefined
       },
-      gridData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }]
+      multipleSelection: [],
+      pageSelection: [],
+      gridData: [],
+      tagTypeArr: ['info', 'warning', '', 'success',  'danger']
     }
   },
-  created() {
+  computed: {
+    selected() {
+      return this.$store.state.addproduct.selected
+    }
   },
   methods: {
     click() {
       this.visible = !this.visible
       this.btnIcon = this.visible ? 'el-icon-close' : 'el-icon-s-goods'
+      if (this.visible) {
+        this.resetComponent()
+        this.handleFilter()
+      }
+    },
+    resetComponent() {
+      this.listQuery.query = ''
+      this.multipleSelection = []
+      this.pageSelection = []
     },
     handleFilter() {
-
+      this.listQuery.page = 1
+      this.getList()
+    },
+    getList() {
+      this.listLoading = true
+      this.setMultSelect()
+      getSkuProducts(this.listQuery).then(res => {
+        const response = res.response
+        this.gridData = response.rows
+        this.total = response.total
+        if (this.gridData.length > 0 && this.selected.length > 0) {
+          this.$nextTick(() => {
+            this.gridData.forEach(data => {
+              if (this.selected.indexOf(data.id) > -1) {
+                this.$refs.addProductTableRef.toggleRowSelection(data)
+              }
+            })
+          })
+        }
+        setTimeout(() => {
+          this.listLoading = false
+        }, 0.5 * 1000)
+      }).catch(() => {
+        this.listLoading = false
+      })
     },
     close() {
       this.visible = false
       this.btnIcon = 'el-icon-s-goods'
+    },
+    choose() {
+      this.setMultSelect()
+      this.close()
+      this.$emit('insertProduct', this.multipleSelection)
+    },
+    handleSelect(selection) {
+      this.pageSelection = selection
+    },
+    setMultSelect() {
+      if (this.pageSelection.length > 0) {
+        this.pageSelection.forEach( pageSelect => {
+          if (this.selected.indexOf(pageSelect.id) === -1) {
+            this.multipleSelection.push(pageSelect)
+          }
+        })
+      }
     }
   }
 }
@@ -99,7 +173,8 @@ export default {
 <style lang="scss" scoped>
 /deep/.pagination-container {
   padding: 0;
-  margin-top: 10px
+  margin-top: 10px;
+  text-align: left;
 }
 .add-product-btn-cls {
   font-size: 17px;
@@ -127,5 +202,17 @@ export default {
 .filter-container-point:hover .filter-container-close {
   cursor: pointer;
   display: block;
+}
+.add-product-insert-btn {
+  position: absolute;
+  right: 13px;
+  bottom: 13px;
+}
+/deep/.el-table .warning-row {
+  background: oldlace;
+}
+
+/deep/.el-table .success-row {
+  background: #f0f9eb;
 }
 </style>

@@ -22,25 +22,13 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="入库单号" min-width="200px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.item_no }}</span>
-        </template>
+      <el-table-column label="出库单号" min-width="200px" align="center" prop="item_no">
       </el-table-column>
-      <el-table-column label="入库数量" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.quantity }}</span>
-        </template>
+      <el-table-column label="出库数量" min-width="160px" align="center" prop="quantity">
       </el-table-column>
-      <el-table-column label="入库金额" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.amount }}</span>
-        </template>
+      <el-table-column label="出库金额" min-width="160px" align="center" prop="amount">
       </el-table-column>
-      <el-table-column label="运费" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.shipping }}</span>
-        </template>
+      <el-table-column label="运费" min-width="160px" align="center" prop="shipping">
       </el-table-column>
       <el-table-column label="状态" min-width="160px" align="center">
         <template slot-scope="scope">
@@ -73,21 +61,21 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyStockIn ref="modifyStockInDialog" @handleFilter="handleFilter"></modifyStockIn>
+    <modifyStockOut ref="modifyStockOutDialog" @handleFilter="handleFilter"></modifyStockOut>
 
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getStockInList, delStockIn } from '@/api/stockin'
+import { getStockOutList, delStockIn } from '@/api/stockout'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
-import modifyStockIn from './components/modify';
+import modifyStockOut from './components/modify';
 
 export default {
-  name: 'StockIn',
-  components: { Pagination, modifyStockIn },
+  name: 'StockOut',
+  components: { Pagination, modifyStockOut },
   data() {
     return {
       tableKey: 0,
@@ -102,12 +90,6 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      },
-      tempCopy: null,
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写厂家名称' }
-        ]
       }
     }
   },
@@ -117,7 +99,6 @@ export default {
     ])
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
     this.getList()
   },
   methods: {
@@ -130,11 +111,11 @@ export default {
       this.getList()
     },
     handleAdd() {
-      this.$refs.modifyStockInDialog.showDialog('create')
+      this.$refs.modifyStockOutDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.$store.dispatch('stockin/setRow', row)
-      this.$refs.modifyStockInDialog.showDialog('update')
+      this.$store.dispatch('stockout/setRow', row)
+      this.$refs.modifyStockOutDialog.showDialog('update')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
@@ -143,16 +124,18 @@ export default {
     },
     getList() {
       this.listLoading = true
-      getStockInList(this.listQuery).then(res => {
+      getStockOutList(this.listQuery).then(res => {
         this.list = res.response.rows
         this.total = res.response.total
-        this.listLoading = false
+        setTimeout(() => {
+          this.listLoading = false
+        }, 0.5 * 1000)
       }).catch(() => {
         this.listLoading = false
       })
     },
     handleDelete(id) {
-      this.$confirm('此操作将永久删除该厂家, 是否继续?', '提示', {
+      this.$confirm('此操作将永久删除该出库单, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

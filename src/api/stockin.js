@@ -1,22 +1,30 @@
 import request from '@/utils/request'
 
-export function getFactoryList(data) {
+export function getStockInList(data) {
   return request({
-    url: 'getFactoryList',
+    url: 'getStockInList',
     method: 'post',
     data
   })
 }
 
-export function addFactory(data) {
+export function addStockIn(data) {
   return request({
-    url: 'addFactory',
+    url: 'addStockIn',
     method: 'post',
     data
   })
 }
 
-export function updateFactory(data) {
+export function getStockInDetail(data) {
+  return request({
+    url: 'getStockInDetail',
+    method: 'post',
+    data
+  })
+}
+
+export function updateStockIn(data) {
   return request({
     url: 'updateFactory',
     method: 'post',
@@ -24,17 +32,9 @@ export function updateFactory(data) {
   })
 }
 
-export function delFactory(data) {
+export function delStockIn(data) {
   return request({
     url: 'delFactroy',
-    method: 'post',
-    data
-  })
-}
-
-export function getFactoryCombo(data) {
-  return request({
-    url: 'getFactoryCombo',
     method: 'post',
     data
   })

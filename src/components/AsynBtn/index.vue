@@ -127,8 +127,8 @@ export default {
 }
 </script>
 
-<style>
-.international-svg {
+<style lang="scss" scoped>
+/deep/.international-svg {
   display: inline-block;
   cursor: pointer;
   fill: #5a5e66;;
@@ -136,16 +136,16 @@ export default {
   height: 20px;
   vertical-align: 10px;
 }
-.el-dialog {
+/deep/.el-dialog {
   width: 30%;
 }
-.el-alert--success.is-light {
+/deep/.el-alert--success.is-light {
   background-color: #ffffff;
 }
-.el-alert--error.is-light {
+/deep/.el-alert--error.is-light {
   background-color: #ffffff;
 }
-.el-alert__description {
+/deep/.el-alert__description {
   float: left;
   margin-top: 1px !important;
   padding-right: 5px !important;
