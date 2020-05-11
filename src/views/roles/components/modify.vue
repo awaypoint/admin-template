@@ -143,11 +143,7 @@ export default {
           this.btnLoding = true
           this.createPermissions()
           addRole(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
@@ -163,12 +159,8 @@ export default {
           this.btnLoding = true
           this.createPermissions()
           updateRole(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
-            this.dialogFormVisible = false
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
+            this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
           }).catch(() => {

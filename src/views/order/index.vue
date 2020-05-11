@@ -86,7 +86,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyOrderDialog ref="modifyOrderDialog" @handleFilter="handleFilter"></modifyOrderDialog>
+    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter"></modifyOrderDialog>
   </div>
 </template>
 
@@ -113,7 +113,8 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      orderRow: {},
     }
   },
   computed: {
@@ -121,10 +122,10 @@ export default {
       'permissions'
     ]),
     typeOptions() {
-      return this.$store.state.order.typeOptions
+      return this.$store.state.const.orderTypeOptions
     },
     typeMap() {
-      return this.$store.state.order.typeMap
+      return this.$store.state.const.orderTypeMap
     },
   },
   created() {
@@ -140,7 +141,7 @@ export default {
       this.getList()
     },
     handleUpdate(row) {
-      this.$store.dispatch('order/setRow', row)
+      this.orderRow = row
       this.$refs.modifyOrderDialog.showDialog('update')
     },
     sortChange(column) {

@@ -11,7 +11,7 @@
       </div>
       <el-input v-model="listQuery.name" placeholder="请输入店铺名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.type" placeholder="请选择店铺类型" clearable class="filter-item" style="width: 150px" @change="handleFilter" filterable>
-        <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
+        <el-option v-for="item in typeList" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
     </div>
 
@@ -75,7 +75,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyShopDialog ref="modifyShopDialog" @handleFilter="handleFilter"></modifyShopDialog>
+    <modifyShopDialog ref="modifyShopDialog" :row="shopRow" @handleFilter="handleFilter"></modifyShopDialog>
   </div>
 </template>
 
@@ -102,7 +102,8 @@ export default {
         type: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      shopRow: {}
     }
   },
   computed: {
@@ -110,10 +111,10 @@ export default {
       'permissions',
     ]),
     typeList() {
-      return this.$store.state.shop.typeList
+      return this.$store.state.const.shopTypeList
     },
     typeMap() {
-      return this.$store.state.shop.typeMap
+      return this.$store.state.const.shopTypeMap
     }
   },
   created() {
@@ -140,7 +141,7 @@ export default {
       this.$refs.modifyShopDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.$store.dispatch('shop/setRow', row)
+      this.shopRow = row
       this.$refs.modifyShopDialog.showDialog('update')
     },
     sortChange(column) {

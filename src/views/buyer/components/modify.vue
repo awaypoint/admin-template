@@ -48,6 +48,12 @@ import { updateBuyer } from '@/api/buyer'
 
 export default {
   name: 'modifyBuyer',
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
@@ -60,19 +66,19 @@ export default {
       temp: {}
     }
   },
-  computed: {
-    typeList() {
-      return this.$store.state.buyer.typeList
-    },
-    typeMap() {
-      return this.$store.state.buyer.typeMap
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
     }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      this.temp = this.$store.state.buyer.row
+      this.$nextTick(() => {
+        this.temp = this.row
+      })
     },
     closeDialog() {
       this.dialogShow = false
@@ -85,11 +91,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           updateBuyer(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()

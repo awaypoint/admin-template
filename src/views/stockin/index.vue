@@ -2,14 +2,28 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addFactory')" @click="handleAdd">
+        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addStockIn')" @click="handleAdd">
           添加
         </el-button>
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getFactoryList')" @click="handleFilter">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getStockInList')" @click="handleFilter">
           查询
         </el-button>
       </div>
-      <el-input v-model="listQuery.name" placeholder="请输入厂家名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.item_no" placeholder="请输入入库单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
+        <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
+      <el-date-picker class="filter-item"
+        v-model="listQuery.times"
+        type="datetimerange"
+        :picker-options="pickerOptions"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        align="right"
+        @change="handleFilter"
+      >
+      </el-date-picker>
     </div>
 
     <el-table
@@ -37,14 +51,14 @@
           <span>{{ scope.row.amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="运费" min-width="160px" align="center">
+      <el-table-column label="运费" min-width="160px" align="center" sortable prop="shipping">
         <template slot-scope="scope">
           <span>{{ scope.row.shipping }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" min-width="160px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.status }}</span>
+          <span>{{ statusMap[scope.row.status] }}</span>
         </template>
       </el-table-column>
       <el-table-column label="入库时间" width="160px" align="center" sortable prop="created_at">
@@ -55,10 +69,10 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateFactory')">
+          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateStockIn')">
             <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delFactroy')">
+          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delStockIn')">
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
             </el-button>
           </el-tooltip>
@@ -73,7 +87,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyStockIn ref="modifyStockInDialog" @handleFilter="handleFilter"></modifyStockIn>
+    <modifyStockIn ref="modifyStockInDialog" :row="stockinRow" @handleFilter="handleFilter"></modifyStockIn>
 
   </div>
 </template>
@@ -98,31 +112,34 @@ export default {
       listQuery: {
         page: 1,
         page_size: 10,
-        name: undefined,
+        item_no: undefined,
         status: undefined,
+        times: undefined,
         order_by: undefined,
         sort_by: undefined
       },
-      tempCopy: null,
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写厂家名称' }
-        ]
-      }
+      stockinRow: {}
     }
   },
   computed: {
     ...mapGetters([
       'permissions'
-    ])
+    ]),
+    statusOptions() {
+      return this.$store.state.const.stockInStatusOptions
+    },
+    statusMap() {
+      return this.$store.state.const.stockInStatusMap
+    },
+    pickerOptions() {
+      return this.$store.state.const.pickerOptions
+    }
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
     this.getList()
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
@@ -133,7 +150,7 @@ export default {
       this.$refs.modifyStockInDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.$store.dispatch('stockin/setRow', row)
+      this.stockinRow = row
       this.$refs.modifyStockInDialog.showDialog('update')
     },
     sortChange(column) {
@@ -146,7 +163,9 @@ export default {
       getStockInList(this.listQuery).then(res => {
         this.list = res.response.rows
         this.total = res.response.total
-        this.listLoading = false
+        setTimeout(() => {
+          this.listLoading = false
+        }, 0.5 * 1000)
       }).catch(() => {
         this.listLoading = false
       })

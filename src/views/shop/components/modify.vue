@@ -21,7 +21,7 @@
         </el-form-item>
         <el-form-item label="店铺类型" prop="role_id">
           <el-select v-model="temp.type" placeholder="请选择" clearable style="width:100%">
-            <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option v-for="item in typeList" :key="item.key" :label="item.label" :value="item.key" />
           </el-select>
         </el-form-item>
         <el-form-item label="描述" prop="desc">
@@ -46,6 +46,12 @@ import { addShop, updateShop } from '@/api/shop'
 
 export default {
   name: 'modifyShop',
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
@@ -69,25 +75,31 @@ export default {
       }
     }
   },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
+  },
   computed: {
     typeList() {
-      return this.$store.state.shop.typeList
+      return this.$store.state.const.shopTypeList
     },
     typeMap() {
-      return this.$store.state.shop.typeMap
+      return this.$store.state.const.shopTypeMap
     }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        if (status === 'create') {
           this.resetForm('dialogForm')
-        })
-      } else {
-        this.temp = this.$store.state.shop.row
-      }
+        } else {
+          this.temp = this.row
+        }
+      })
     },
     closeDialog() {
       this.dialogShow = false
@@ -107,11 +119,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           addShop(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
@@ -126,11 +134,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           updateShop(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()

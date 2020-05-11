@@ -16,8 +16,6 @@
       v-show="imagecropperShow"
       field="file"
       :key="imagecropperKey"
-      :width="300"
-      :height="300"
       :url="imageUpHost"
       lang-type="zh"
       @close="close"
@@ -167,11 +165,7 @@ export default {
           if (res.code === 0) {
             this.btnLoding = false
             this.resetPwdFDialogVisible = false
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.resetForm('resetPwdForm')
           }
         }).catch(() => {

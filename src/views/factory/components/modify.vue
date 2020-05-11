@@ -44,6 +44,12 @@ import { updateFactory, addFactory } from '@/api/factory'
 
 export default {
   name: 'modifyFactory',
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
@@ -67,17 +73,23 @@ export default {
       }
     }
   },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
+  },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        if (status === 'create') {
           this.resetForm('dialogForm')
-        })
-      } else {
-        this.temp = this.$store.state.factory.row
-      }
+        } else {
+          this.temp = this.row
+        }
+      })
     },
     closeDialog() {
       this.dialogShow = false

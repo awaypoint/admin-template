@@ -30,7 +30,7 @@
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="描述" min-width="160px" align="center">
+      <el-table-column label="描述" min-width="160px" align="center" show-overflow-tooltip>
         <template slot-scope="scope">
           <span>{{ scope.row.desc }}</span>
         </template>
@@ -72,7 +72,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyFactory ref="modifyFactoryDialog" @handleFilter="handleFilter"></modifyFactory>
+    <modifyFactory ref="modifyFactoryDialog" :row="factoryRow" @handleFilter="handleFilter"></modifyFactory>
   </div>
 </template>
 
@@ -99,7 +99,8 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      factoryRow: {}
     }
   },
   computed: {
@@ -107,7 +108,7 @@ export default {
       'permissions'
     ]),
     statusOptions() {
-      return this.$store.state.factory.statusOptions
+      return this.$store.state.const.statusOptions
     }
   },
   created() {
@@ -125,7 +126,7 @@ export default {
       this.$refs.modifyFactoryDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.$store.dispatch('factory/setRow', row)
+      this.factoryRow = row
       this.$refs.modifyFactoryDialog.showDialog('update')
     },
     sortChange(column) {

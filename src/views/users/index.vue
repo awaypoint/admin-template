@@ -220,7 +220,6 @@ export default {
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleModifyState(row) {

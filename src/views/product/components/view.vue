@@ -72,24 +72,36 @@ import { getProductDetail } from '@/api/product'
 export default {
   name: 'viewProduct',
   components: {},
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       dialogShow: false,
-      dialogStatus: 'view',
+      dialogStatus: '',
       priceColNum: 4,
       temp: {}
+    }
+  },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
     }
   },
   methods: {
     showDialog(status) {
       this.dialogShow = true
       this.dialogStatus = status
-      this.temp = {}
-      const row = this.$store.state.product.row
-      getProductDetail({ id: row.id }).then( res => {
-        this.temp = res.response
-        this.priceColNum = Math.min(4, this.temp.price.length)
-      }).catch(() => {})
+      this.$nextTick(() => {
+        getProductDetail({ id: this.row.id }).then( res => {
+          this.temp = res.response
+          this.priceColNum = Math.min(4, this.temp.price.length)
+        }).catch(() => {})
+      })
     },
     closeDialog() {
       this.dialogShow = false

@@ -1,4 +1,5 @@
 import { asyncRoutes, constantRoutes } from '@/router'
+import { template } from '@babel/core'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -26,7 +27,9 @@ export function filterAsyncRoutes(routes, permissions) {
       if (tmp.children) {
         tmp.children = filterAsyncRoutes(tmp.children, permissions)
       }
-      res.push(tmp)
+      if (tmp.children === undefined || (tmp.children && tmp.children.length > 0)) {
+        res.push(tmp)
+      }
     }
   })
 

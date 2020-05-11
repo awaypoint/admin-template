@@ -49,17 +49,7 @@
         </el-table-column>
         <el-table-column label="货号" width="100px" align="center" sortable prop='cargo_number'>
           <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              width="100%"
-              trigger="hover">
-              <el-image
-                :src="scope.row.image"
-                fit="contain"
-              >
-              </el-image>
-              <el-tag slot="reference" effect="dark">{{ scope.row.cargo_number }}</el-tag>
-            </el-popover>
+            <productPopover :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
           </template>
         </el-table-column>
         <el-table-column label="SKU" min-width="160px" align="center" prop="attr_arr">
@@ -122,10 +112,17 @@
 import { addStockIn, getStockInDetail } from '@/api/stockin'
 import addProduct from '@/components/addProduct'
 import factorySelect from '@/components/factorySelect'
+import productPopover from '@/components/productPopover';
 
 export default {
   name: 'modifyStockIn',
-  components: { addProduct, factorySelect },
+  components: { addProduct, factorySelect, productPopover },
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
@@ -152,25 +149,28 @@ export default {
       tagTypeArr: ['info', 'warning', '', 'success',  'danger'],
     }
   },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
+  },
   computed: {
     typeOptions() {
-      return this.$store.state.stockin.typeOptions
-    },
-    typeMap() {
-      return this.$store.state.shop.typeMap
+      return this.$store.state.const.boolOptions
     }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        if (status === 'create') {
           this.resetForm('dialogForm')
-        })
-      } else {
-        this.getDetail(this.$store.state.stockin.row.id)
-      }
+        } else {
+          this.getDetail(this.row.id)
+        }
+      })
     },
     closeDialog() {
       this.dialogShow = false
@@ -222,11 +222,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           updateShop(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
@@ -245,8 +241,9 @@ export default {
           const proItem = {
             product_sku_id: item.id,
             product_id: item.product_id,
+            subject: item.subject,
             cargo_number: item.cargo_number,
-            image: '',
+            image: item.image,
             attr_arr: item['attr_arr'],
             price: 0,
             quantity: 0,

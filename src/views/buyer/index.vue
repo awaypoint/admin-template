@@ -60,7 +60,7 @@
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateBuyer')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row, 'update')"></el-button>
+            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="订单列表" placement="bottom-end" v-show="checkPermission('getOrderList')">
             <el-button icon="el-icon-s-order" size="mini" type="primary">
@@ -77,7 +77,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyBuyerDialog ref="modifyBuyerDialog" @handleFilter="handleFilter"></modifyBuyerDialog>
+    <modifyBuyerDialog ref="modifyBuyerDialog" :row="buyerRow" @handleFilter="handleFilter"></modifyBuyerDialog>
   </div>
 </template>
 
@@ -95,11 +95,8 @@ export default {
     ...mapGetters([
       'permissions',
     ]),
-    typeList() {
-      return this.$store.state.buyer.typeList
-    },
-    typeMap() {
-      return this.$store.state.buyer.typeMap
+    pickerOptions() {
+      return this.$store.state.const.pickerOptions
     }
   },
   data() {
@@ -116,33 +113,7 @@ export default {
         order_by: undefined,
         sort_by: undefined
       },
-      pickerOptions: {
-        shortcuts: [{
-          text: '最近一周',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近一个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近三个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-            picker.$emit('pick', [start, end]);
-          }
-        }]
-      }
+      buyerRow: {}
     }
   },
   created() {
@@ -156,9 +127,9 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleUpdate(row, status) {
-      this.$store.dispatch('buyer/setRow', row)
-      this.$refs.modifyBuyerDialog.showDialog(status)
+    handleUpdate(row) {
+      this.buyerRow = row
+      this.$refs.modifyBuyerDialog.showDialog('update')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop

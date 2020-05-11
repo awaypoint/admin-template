@@ -65,17 +65,7 @@
         </el-table-column>
         <el-table-column label="货号" width="100px" align="center" sortable prop='cargo_number'>
           <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              width="100%"
-              trigger="hover">
-              <el-image
-                :src="scope.row.image"
-                fit="contain"
-              >
-              </el-image>
-              <el-tag slot="reference" effect="dark">{{ scope.row.cargo_number }}</el-tag>
-            </el-popover>
+            <productPopover :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
           </template>
         </el-table-column>
         <el-table-column label="SKU" min-width="160px" align="center" prop="attr_arr">
@@ -128,10 +118,17 @@
 <script>
 import { addRep, getRepDetail } from '@/api/replenishment'
 import addProduct from '@/components/addProduct'
+import productPopover from '@/components/productPopover';
 
 export default {
   name: 'modifyReplenishment',
-  components: { addProduct },
+  components: { addProduct, productPopover },
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
@@ -159,25 +156,31 @@ export default {
       tagTypeArr: ['info', 'warning', '', 'success',  'danger']
     }
   },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
+  },
   computed: {
     urgencyOptions() {
-      return this.$store.state.replenishment.urgencyOptions
+      return this.$store.state.const.replenishmentUrgencyOptions
     },
     reachedOptions() {
-      return this.$store.state.replenishment.reachedOptions
+      return this.$store.state.const.boolOptions
     }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        if (status === 'create') {
           this.resetForm('dialogForm')
-        })
-      } else {
-        this.getDetail(this.$store.state.replenishment.row.id)
-      }
+        } else {
+          this.getDetail(this.row.id)
+        }
+      })
     },
     closeDialog() {
       this.dialogShow = false
@@ -238,8 +241,9 @@ export default {
           const temp = {
             product_sku_id: item.id,
             product_id: item.product_id,
+            subject: item.subject,
             cargo_number: item.cargo_number,
-            image: '',
+            image: item.image,
             attr_arr: item['attr_arr'],
             quantity: 0
           }

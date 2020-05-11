@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getFactoryList')" @click="handleFilter">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getStockList')" @click="handleFilter">
           查询
         </el-button>
       </div>
@@ -36,7 +36,7 @@
       </el-table-column> -->
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateFactory')">
+          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateStock')">
             <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
         </template>

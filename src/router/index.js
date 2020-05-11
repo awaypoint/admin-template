@@ -122,6 +122,7 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/product/index'),
         name: 'product',
+        route: 'Product',
         meta: { title: '产品管理', icon: 'theme' }
       }
     ]
@@ -148,34 +149,37 @@ export const asyncRoutes = [
     component: Layout,
     redirect: 'noRedirect',
     name: 'store',
-    meta: { title: '库存管理', icon: 'money' },
+    meta: { title: '库存管理', icon: 'component' },
     children: [
 
       {
         path: 'stock',
         component: () => import('@/views/stock/index'),
         name: 'stock',
-        meta: { title: '仓库列表', icon: 'money' }
+        route: 'Stock',
+        meta: { title: '仓库列表', icon: 'list' }
       },
       {
         path: 'stockin',
         component: () => import('@/views/stockin/index'),
         name: 'stockin',
-        meta: { title: '入库', icon: 'money' }
+        route: 'StockIn',
+        meta: { title: '入库', icon: 'stockin' }
       },
       {
         path: 'stockout',
         component: () => import('@/views/stockout/index'),
         name: 'stockout',
-        meta: { title: '出库', icon: 'money' }
+        route: 'StockOut',
+        meta: { title: '出库', icon: 'stockout' }
       },
       {
         path: 'replenishment',
         component: () => import('@/views/replenishment/index'),
         name: 'replenishment',
-        meta: { title: '补货列表', icon: 'money' }
+        route: 'Replenishment',
+        meta: { title: '补货列表', icon: 'replenishment' }
       }
-
     ]
   },
 

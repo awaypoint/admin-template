@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addFactory')" @click="handleAdd">
+        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addStockOut')" @click="handleAdd">
           添加
         </el-button>
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getFactoryList')" @click="handleFilter">
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getStockOutList')" @click="handleFilter">
           查询
         </el-button>
       </div>
@@ -43,10 +43,10 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateFactory')">
+          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateStockOut')">
             <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delFactroy')">
+          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delStockOut')">
             <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
             </el-button>
           </el-tooltip>
@@ -61,7 +61,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyStockOut ref="modifyStockOutDialog" @handleFilter="handleFilter"></modifyStockOut>
+    <modifyStockOut ref="modifyStockOutDialog" :row="stockoutRow" @handleFilter="handleFilter"></modifyStockOut>
 
   </div>
 </template>
@@ -90,7 +90,8 @@ export default {
         status: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      stockoutRow: {}
     }
   },
   computed: {
@@ -103,7 +104,6 @@ export default {
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
@@ -114,7 +114,7 @@ export default {
       this.$refs.modifyStockOutDialog.showDialog('create')
     },
     handleUpdate(row) {
-      this.$store.dispatch('stockout/setRow', row)
+      this.stockoutRow = row
       this.$refs.modifyStockOutDialog.showDialog('update')
     },
     sortChange(column) {
@@ -141,11 +141,7 @@ export default {
         type: 'warning'
       }).then(() => {
         del({ 'id': id }).then((res) => {
-          this.$message({
-            message: res.codemsg || '操作成功',
-            type: 'success',
-            showClose: true
-          })
+          this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
           this.handleFilter()
         })
       }).catch(() => {})

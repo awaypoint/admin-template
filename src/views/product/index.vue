@@ -36,20 +36,9 @@
       :summary-method="getSummaries"
       @sort-change="sortChange"
     >
-      <el-table-column label="产品名称" min-width="200px" align="left">
+      <el-table-column label="产品名称" min-width="250px" align="left">
         <template slot-scope="scope">
-          <el-popover
-            placement="top-start"
-            width="200"
-            height="200"
-            trigger="hover">
-            <el-image
-              :src="scope.row.image"
-              fit="contain"
-            >
-            </el-image>
-            <span slot="reference">{{ scope.row.subject }}</span>
-          </el-popover>
+          <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
         </template>
       </el-table-column>
       <el-table-column label="货号" min-width="160px" align="center">
@@ -57,12 +46,12 @@
           <span>{{ scope.row.product_cargo_number }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="销售价" min-width="160px" align="center">
+      <el-table-column label="销售价" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.consign_price }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="平台价" min-width="160px" align="center">
+      <el-table-column label="平台价" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.consign_price }}</span>
         </template>
@@ -95,7 +84,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <viewProductDialog ref="viewProductDialog"></viewProductDialog>
+    <viewProductDialog ref="viewProductDialog" :row="productRow"></viewProductDialog>
     <modifyProductDialog ref="modifyProductDialog"></modifyProductDialog>
   </div>
 </template>
@@ -107,10 +96,11 @@ import Pagination from '@/components/Pagination'
 import { checkPermission } from '@/utils/index'
 import modifyProductDialog from './components/modify';
 import viewProductDialog from './components/view';
+import productPopover from '@/components/productPopover';
 
 export default {
   name: 'Product',
-  components: { Pagination, modifyProductDialog, viewProductDialog },
+  components: { Pagination, modifyProductDialog, viewProductDialog, productPopover },
   data() {
     return {
       tableKey: 0,
@@ -125,46 +115,22 @@ export default {
         order_by: undefined,
         sort_by: undefined
       },
-      pickerOptions: {
-        shortcuts: [{
-          text: '最近一周',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近一个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近三个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-            picker.$emit('pick', [start, end]);
-          }
-        }]
-      }
+      productRow: {}
     }
   },
   computed: {
     ...mapGetters([
       'permissions'
-    ])
+    ]),
+    pickerOptions() {
+      return this.$store.state.app.pickerOptions
+    }
   },
   created() {
     this.getList()
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
@@ -175,7 +141,7 @@ export default {
       this.$refs.modifyProductDialog.showDialog(status)
     },
     handleView(row) {
-      this.$store.dispatch('product/setRow', row)
+      this.productRow = row
       this.$refs.viewProductDialog.showDialog('view')
     },
     sortChange(column) {
@@ -221,11 +187,3 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
-/deep/.el-range-input  {
-  vertical-align: top;
-}
-/deep/.el-range-separator {
-  vertical-align: top;
-}
-</style>

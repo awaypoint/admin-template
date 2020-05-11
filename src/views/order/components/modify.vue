@@ -140,17 +140,7 @@
         </el-table-column>
         <el-table-column label="货号" width="100px" align="center" sortable prop='cargo_number'>
           <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              width="100%"
-              trigger="hover">
-              <el-image
-                :src="scope.row.image"
-                fit="contain"
-              >
-              </el-image>
-              <el-tag slot="reference" effect="dark">{{ scope.row.cargo_number }}</el-tag>
-            </el-popover>
+            <productPopover :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
           </template>
         </el-table-column>
         <el-table-column label="sku" min-width="100px" align="center" prop="quantity">
@@ -230,18 +220,25 @@ import { mapGetters } from 'vuex'
 import { getOrderDetail } from '@/api/order'
 import addProduct from '@/components/addProduct';
 import { checkPermission } from '@/utils/index'
+import productPopover from '@/components/productPopover';
 
 export default {
   name: 'modifyOrder',
-  components: { addProduct },
+  components: { addProduct, productPopover },
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       textMap: {
         update: '编辑订单',
-        create: '添加厂家'
+        create: '添加订单'
       },
       dialogShow: false,
-      dialogStatus: 'update',
+      dialogStatus: '',
       btnLoding: false,
       temp: {},
       defaultTemp: {
@@ -263,34 +260,39 @@ export default {
       tagTypeArr: ['info', 'warning', '', 'success',  'danger']
     }
   },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
+  },
   computed: {
     ...mapGetters([
       'permissions'
     ]),
     typeMap() {
-      return this.$store.state.order.typeMap
+      return this.$store.state.const.orderTypeMap
     },
     resourceOptions() {
-      return this.$store.state.order.resourceOptions
+      return this.$store.state.const.orderResourceOptions
     }
   },
   methods: {
     checkPermission(check) {
       return checkPermission(this.permissions, check)
     },
-    showDialog(status) {
-      this.dialogStatus = status
+    showDialog(dialogStatus) {
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        this.dialogStatus = dialogStatus
+        if (dialogStatus === 'create') {
           this.resetForm('dialogForm')
-        })
-      } else {
-        const row = this.$store.state.order.row
-        getOrderDetail({ id: row.id }).then( res => {
-          this.temp = res.response
-        }).catch(() => {})
-      }
+        } else {
+          getOrderDetail({ id: this.row.id }).then( res => {
+            this.temp = res.response
+          }).catch(() => {})
+        }
+      })
     },
     closeDialog() {
       this.$refs.addProduct.close()
@@ -311,11 +313,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           addFactory(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
@@ -330,11 +328,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           updateFactory(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()
@@ -352,7 +346,7 @@ export default {
     },
     getSummaries(params) {
       const { columns, data } = params
-      const sums = [ '总计', 333, 222 ]
+      const sums = [ '', '总计', '', 15615, 15615 ]
       return sums
     }
   }
