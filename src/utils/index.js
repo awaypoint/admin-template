@@ -17,8 +17,12 @@ export function parseTime(time, cFormat) {
   if (typeof time === 'object') {
     date = time
   } else {
-    if ((typeof time === 'string') && (/^[0-9]+$/.test(time))) {
-      time = parseInt(time)
+    if ((typeof time === 'string')) {
+      if ((/^[0-9]+$/.test(time))) {
+        time = parseInt(time)
+      } else {
+        return time //这里约定如果不是时间戳原样返回
+      }
     }
     if ((typeof time === 'number') && (time.toString().length === 10)) {
       time = time * 1000

@@ -10,9 +10,6 @@
         </el-button>
       </div>
       <el-input v-model="listQuery.name" placeholder="请输入店铺名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.type" placeholder="请选择店铺类型" clearable class="filter-item" style="width: 150px" @change="handleFilter" filterable>
-        <el-option v-for="item in typeList" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
     </div>
 
     <el-table
@@ -30,19 +27,20 @@
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="店铺类型" min-width="200px" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.type === '1' ? 'danger' : ''">{{ typeMap[scope.row.type] }}</el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="产品数量" width="100px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
+          <span>{{ scope.row.product_num }}</span>
         </template>
       </el-table-column>
       <el-table-column label="订单数量" width="100px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
+          <span>{{ scope.row.order_num }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="授权到期时间" width="160px" align="center" sortable prop="refresh_toke_expire_at">
+        <template slot-scope="scope">
+          <i class="el-icon-time" />
+          <span>{{ scope.row.refresh_toke_expire_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="创建时间" width="160px" align="center" sortable prop="created_at">
@@ -53,17 +51,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateShop')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delShop')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="授权" placement="bottom-end" v-show="checkAuth(scope.row)">
-            <el-button icon="el-icon-connection" size="mini" type="primary" @click="gotoAuth(scope.row.auth_url)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button icon="el-icon-connection" size="mini" type="primary" @click="gotoAuth(scope.row.auth_url)">授权</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -109,13 +99,7 @@ export default {
   computed: {
     ...mapGetters([
       'permissions',
-    ]),
-    typeList() {
-      return this.$store.state.const.shopTypeList
-    },
-    typeMap() {
-      return this.$store.state.const.shopTypeMap
-    }
+    ])
   },
   created() {
     this.getList()
@@ -125,7 +109,7 @@ export default {
       return checkPermission(this.permissions, check)
     },
     checkAuth(row) {
-      if (!this.checkPermission('delShop')) {
+      if (!this.checkPermission('authShop')) {
         return false
       }
       if (!row.auth_url) {

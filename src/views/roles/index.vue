@@ -65,12 +65,8 @@
 
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width" prop="operate">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" v-show="checkPermission('updateRole')" placement="bottom-end">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" v-show="checkPermission('delRole')" placement="bottom-end">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)"></el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,7 +78,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyRoleDialog ref="modifyRoleDialog" @handleFilter="handleFilter"></modifyRoleDialog>
+    <modifyRoleDialog ref="modifyRoleDialog" :row="roleRow" @handleFilter="handleFilter"></modifyRoleDialog>
   </div>
 </template>
 
@@ -107,7 +103,8 @@ export default {
         page_size: 10,
         name: '',
         status: ''
-      }
+      },
+      roleRow: {}
     }
   },
   computed: {
@@ -158,9 +155,7 @@ export default {
           this.listLoading = false
         }, 0.5 * 1000)
       }).catch(() => {
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
+        this.listLoading = false
       })
     },
     handleFilter() {
@@ -169,11 +164,7 @@ export default {
     },
     handleModifyState(index, row) {
       updateRole({ 'id': row.id, 'status': row.status }).then((res) => {
-        this.$message({
-          message: res.codemsg || '操作成功',
-          type: 'success',
-          showClose: true
-        })
+        this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
         this.handleFilter()
       }).catch(() => {
         this.handleFilter()
@@ -186,17 +177,13 @@ export default {
         type: 'warning'
       }).then(() => {
         removeRole({ 'id': id }).then((res) => {
-          this.$message({
-            message: res.codemsg || '操作成功',
-            type: 'success',
-            showClose: true
-          })
+          this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
           this.handleFilter()
         }).catch(() => {})
       })
     },
     handleUpdate(row) {
-      this.$store.dispatch('role/setRow', row)
+      this.roleRow = row
       this.$refs.modifyRoleDialog.showDialog('update')
     },
     setRowPermissions(rolePermissions, row) {
@@ -240,3 +227,8 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+/deep/.el-table th {
+  padding: 11px 0;
+}
+</style>

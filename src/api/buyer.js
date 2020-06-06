@@ -8,6 +8,14 @@ export function getBuyerList(data) {
   })
 }
 
+export function addBuyer(data) {
+  return request({
+    url: 'addBuyer',
+    method: 'post',
+    data
+  })
+}
+
 export function updateBuyer(data) {
   return request({
     url: 'updateBuyer',

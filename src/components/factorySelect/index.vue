@@ -32,6 +32,9 @@ export default {
       this.$emit('selectFactory', value)
     },
     setValue(value) {
+      if (value === '0') {
+        value = ''
+      }
       this.value = value
     }
   }

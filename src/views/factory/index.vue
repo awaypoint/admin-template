@@ -54,13 +54,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateFactory')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delFactroy')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

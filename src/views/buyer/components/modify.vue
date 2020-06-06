@@ -10,16 +10,19 @@
     >
       <el-form
         ref="dialogForm"
+        :rules="rules"
         :model="temp"
         label-position="right"
         label-width="90px"
         class="dialog-form-cls"
       >
         <el-form-item label="买家名称" prop="buyer_login_id">
-          <el-input v-model="temp.buyer_login_id" readonly/>
+          <el-input v-model="temp.buyer_login_id" :readonly="dialogStatus==='update' && temp.type === '1'"/>
         </el-form-item>
-        <el-form-item label="买家id" prop="buyer_member_id">
-          <el-input v-model="temp.buyer_member_id" readonly/>
+        <el-form-item label="买家类型" prop="type">
+          <el-select v-model="temp.type" disabled>
+            <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
+          </el-select>
         </el-form-item>
         <el-form-item label="性别" prop="sex">
           <el-radio v-model="temp.sex" label="1">男</el-radio>
@@ -35,7 +38,7 @@
         <el-button 
           type="primary" 
           size="small" 
-          @click="updateData"
+          @click="dialogStatus==='create'?submit($event):updateData()"
           :loading="btnLoding"
         >确认</el-button>
       </div>
@@ -44,7 +47,7 @@
 </template>
 
 <script>
-import { updateBuyer } from '@/api/buyer'
+import { addBuyer, updateBuyer } from '@/api/buyer'
 
 export default {
   name: 'modifyBuyer',
@@ -52,6 +55,14 @@ export default {
     row: {
       type: Object,
       required: true
+    }
+  },
+  computed: {
+    typeOptions() {
+      return this.$store.state.const.buyerTypeList
+    },
+    typeMap() {
+      return this.$store.state.const.buyerTypeMap
     }
   },
   data() {
@@ -63,7 +74,19 @@ export default {
       dialogShow: false,
       dialogStatus: 'create',
       btnLoding: false,
-      temp: {}
+      temp: {},
+      defaultTemp: {
+        id: undefined,
+        buyer_login_id: '',
+        type: '2',
+        sex: '3',
+        desc: ''
+      },
+      rules: {
+        buyer_login_id: [
+          { required: true, trigger: 'blur', message: '请填写买家名称' }
+        ]
+      }
     }
   },
   watch: {
@@ -77,14 +100,40 @@ export default {
       this.dialogStatus = status
       this.dialogShow = true
       this.$nextTick(() => {
-        this.temp = this.row
+        if (status === 'create') {
+          this.resetForm('dialogForm')
+        } else {
+          this.temp = Object.assign({}, this.row)
+        }
       })
+    },
+    resetForm(formName) {
+      if (this.$refs[formName] === undefined) {
+        return false
+      }
+      this.$refs[formName].resetFields()
+      this.temp = Object.assign({}, this.defaultTemp)
     },
     closeDialog() {
       this.dialogShow = false
     },
     handleFilter() {
       this.$emit('handleFilter')
+    },
+    submit(event) {
+      this.$refs['dialogForm'].validate((valid) => {
+        if (valid) {
+          this.btnLoding = true
+          addBuyer(this.temp).then((res) => {
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
+            this.dialogShow = false
+            this.btnLoding = false
+            this.handleFilter()
+          }).catch(() => {
+            this.btnLoding = false
+          })
+        }
+      })
     },
     updateData() {
       this.$refs['dialogForm'].validate((valid) => {

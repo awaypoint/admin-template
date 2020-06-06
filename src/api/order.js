@@ -15,3 +15,19 @@ export function getOrderDetail(data) {
     data
   })
 }
+
+export function brushOrder(data) {
+  return request({
+    url: 'brushOrder',
+    method: 'post',
+    data
+  })
+}
+
+export function getPrinterOrders(data) {
+  return request({
+    url: 'getPrinterOrders',
+    method: 'post',
+    data
+  })
+}

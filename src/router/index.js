@@ -43,6 +43,11 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
+  {
+    path: '/printe',
+    component: () => import('@/layout/views/orderPrinter'),
+    hidden: true
+  },
 
   {
     path: '/',

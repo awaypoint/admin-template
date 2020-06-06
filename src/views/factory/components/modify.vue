@@ -87,7 +87,7 @@ export default {
         if (status === 'create') {
           this.resetForm('dialogForm')
         } else {
-          this.temp = this.row
+          this.temp = Object.assign({}, this.row)
         }
       })
     },
@@ -109,11 +109,7 @@ export default {
         if (valid) {
           this.btnLoding = true
           addFactory(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
             this.handleFilter()

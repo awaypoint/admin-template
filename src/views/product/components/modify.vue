@@ -21,112 +21,197 @@
           <el-row :gutter="10">
             <div class="form-container-base">
               <el-col :span="24">
-                <el-form-item label="产品名称" prop="name">
-                  <el-input v-model="temp.name"></el-input>
+                <el-form-item label="产品名称" prop="subject">
+                  <el-input v-model="temp.subject"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="产品货号" prop="name">
-                  <el-input v-model="temp.no"></el-input>
+                <el-form-item label="产品货号" prop="product_cargo_number">
+                  <el-input v-model="temp.product_cargo_number"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="产品售价" prop="name">
-                  <el-input v-model="temp.price"></el-input>
+                <el-form-item label="产品售价" prop="consign_price">
+                  <el-input v-model="temp.consign_price"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="库位" prop="stock">
+                  <el-input v-model="temp.stock"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="工厂" prop="factory">
+                  <factorySelect ref="factorySelectRef" @selectFactory="selectFactory"></factorySelect>
                 </el-form-item>
               </el-col>
             </div>
           </el-row>
-          <el-divider content-position="left"><i class="el-icon-info divider-icon" />SKU</el-divider>
+          <el-divider content-position="left"><i class="el-icon-info divider-icon" />产品规格</el-divider>
           <el-row :gutter="10">
-            <div class="form-container-sku" v-for="(sku, ik) in skus" :key="ik">
-              <el-col :span="12">
+            <div class="form-container-sku">
+              <el-col :span="24">
                 <div class="form-container-sku-items" >
-                  <el-form-item label="图片">
-                    <dropzone 
-                      :ref="'dropzoneImage' + ik"
-                      :id="'skuDropzone' + ik"
-                      :url="imageUpHost"
-                      :maxFiles="1"
-                      @dropzone-success="dropzoneS" 
-                      @dropzone-error="dropzoneE"
+                   <el-form-item label="颜色">
+                    <div class="form-container-sku-color" v-for="(color, ck) in temp.colors" :key="'color' + ck">
+                      <el-col :span="6">
+                        <el-checkbox v-if="typeof(color.type) === 'undefined'" :label="color.label" v-model="color.value"></el-checkbox>
+                        <div  v-if="color.type === 'input'">
+                          <el-col :span="18">
+                            <el-input v-model="color.label" placeholder="请输入颜色" size="small"></el-input>
+                          </el-col>
+                          <el-col :span="6">
+                            <el-button type="text" @click="delElement('colors', ck)">删除</el-button>
+                          </el-col>
+                        </div>
+                      </el-col>
+                    </div>
+                    <el-col :span="6">
+                      <el-button type="text" icon="el-icon-plus" @click="insertElement('colors')">添加自定义项</el-button>
+                    </el-col>
+                  </el-form-item>
+                  <el-form-item>
+                    <div class="form-container-sku-image" v-for="(color2, ck2) in temp.colors" :key="'img' + ck2">
+                      <el-col :span="4">
+                        <div v-if="color2.value">
+                          <el-upload
+                            class="avatar-uploader"
+                            :action="imageUpHost"
+                            :show-file-list="false"
+                            :on-success="dropzoneS"
+                            :data="{ k: ck2}"
+                            >
+                            <img v-if="color2.img" :src="color2.img" class="avatar">
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                          </el-upload>
+                          <el-input v-model="color2.label" size="small"></el-input>
+                          <el-input size="small" placeholder="请填写货号" v-model="color2.cargo_number"></el-input>
+                        </div>
+                      </el-col>
+                    </div>
+                  </el-form-item>
+                <div>
+                  <el-form-item label="尺码">
+                    <div class="form-container-sku-size" v-for="(size, sk) in temp.size" :key="'size' + sk">
+                      <el-col :span="6">
+                        <el-checkbox v-if="typeof(size.type) === 'undefined'" :label="size.label" v-model="size.value" @change="selectSize"></el-checkbox>
+                        <div  v-if="size.type === 'input'">
+                          <el-col :span="18">
+                            <el-input v-model="size.label" placeholder="请输入尺码" size="small" @input="selectSize"></el-input>
+                          </el-col>
+                          <el-col :span="6">
+                            <el-button type="text" @click="delElement('size', sk)">删除</el-button>
+                          </el-col>
+                        </div>
+                      </el-col>
+                    </div>
+                    <el-col :span="6">
+                      <el-button type="text" icon="el-icon-plus" @click="insertElement('size')">添加自定义项</el-button>
+                    </el-col>
+                  </el-form-item>
+                </div>
+                <div>
+                  <el-form-item label="尺码表">
+                    <div class="form-container-sku-sizetable-columns" v-for="(sizeTable, st) in temp.size_table" :key="'sizeTable' + st">
+                      <el-col :span="6">
+                        <el-checkbox v-if="typeof(sizeTable.type) === 'undefined'" :label="sizeTable.label" v-model="sizeTable.value" @change="createColumns"></el-checkbox>
+                        <div  v-if="sizeTable.type === 'input'">
+                          <el-col :span="18">
+                            <el-input v-model="sizeTable.label" placeholder="请输入内容" size="small" @input="createColumns"></el-input>
+                          </el-col>
+                          <el-col :span="6">
+                            <el-button type="text" @click="delElement('size_table', st)">删除</el-button>
+                          </el-col>
+                        </div>
+                      </el-col>
+                    </div>
+                    <el-col :span="6">
+                      <el-button type="text" icon="el-icon-plus" @click="insertElement('size_table')">添加自定义项</el-button>
+                    </el-col>
+                  </el-form-item>
+                </div>
+                </div>
+              </el-col>
+            </div>
+            <div class="form-container-sku-sizetable">
+              <el-table
+                :key="key"
+                row-key="id"
+                :data="temp.size_table_data"
+                border
+                highlight-current-row
+                style="width: 100%;"
+                ref="sizeTable"
+              >
+                <el-table-column label="尺码" min-width="100px" align="center" prop='size' />
+                <el-table-column v-for="(sizeO,stt) in sizeTableColumns" :key="'sizeTableT' + stt" :label="sizeO.label" min-width="100px" align="center">
+                  <template slot-scope="scope">
+                    <el-input 
+                      v-model="scope.row['key' + sizeO.label]"
+                      class="edit-input" size="small"
                     />
-                  </el-form-item>
-                  <el-form-item label="货号">
-                    <el-input v-model="temp.name"></el-input>
-                  </el-form-item>
-                  <el-form-item label="属性">
-                    <el-col :span="18">
-                      <el-select v-model="value1" multiple placeholder="请选择">
-                        <el-option
-                          v-for="item in options"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value">
-                        </el-option>
-                      </el-select>
-                    </el-col>
-                    <el-col :span="6" class="sku-btn-group">
-                      <el-button-group>
-                        <el-button icon="el-icon-plus" size="mini" circle></el-button>
-                        <el-button type="danger" icon="el-icon-delete" size="mini" circle @click="changeSku(ik, 'del')"></el-button>
-                      </el-button-group>
-                    </el-col>
-                  </el-form-item>
-                </div>
-              </el-col>
+                  </template>
+                </el-table-column>
+              </el-table>
             </div>
           </el-row>
-          <el-divider content-position="left"><i class="el-icon-info divider-icon" />价格</el-divider>
+          <el-divider content-position="left"><i class="el-icon-info divider-icon" />工艺</el-divider>
           <el-row :gutter="10">
-            <div class="form-container-price" v-for="(priceItem, pk) in price" :key="pk + 'price'">
-              <el-col :span="12">
-                <div class="form-container-price-items" >
-                  <el-form-item label="起购数" prop="region">
-                    <el-input v-model="temp.min"></el-input>
-                  </el-form-item>
-                  <el-col :span="20">
-                    <el-form-item label="价格" prop="region">
-                      <el-input v-model="temp.price"></el-input>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="4" class="price-btn-group">
-                    <el-button-group>
-                      <el-button type="danger" icon="el-icon-delete" size="mini" circle @click="changePrice(pk, 'del')"></el-button>
-                    </el-button-group>
-                  </el-col>
-                </div>
-              </el-col>
-            </div>
-          </el-row>
-          <el-divider content-position="left"><i class="el-icon-info divider-icon" />属性</el-divider>
-          <el-row :gutter="10">
-            <div class="form-container-attrs" v-for="(attrItem, ak) in attrs" :key="ak + 'attr'">
-              <el-col :span="12">
-                <el-form-item label="属性" prop="date1">
-                  <el-col :span="9">
-                    <el-input placeholder="属性名称" v-model="attrItem.label" style="width: 100%;"></el-input>
-                  </el-col>
-                  <el-col class="form-container-attr-split" :span="2">:</el-col>
-                  <el-col :span="9">
-                    <el-input placeholder="属性值" v-model="attrItem.value" style="width: 100%;"></el-input>
-                  </el-col>
-                  <el-col :span="4" class="attr-btn-group">
-                    <el-button-group>
-                      <el-button type="danger" icon="el-icon-delete" size="mini" circle @click="changeAttr(ak, 'del')"></el-button>
-                    </el-button-group>
-                  </el-col>
-                </el-form-item>
-              </el-col>
-            </div>
+            <el-col :span="12">
+              <el-form-item label="布行名称" prop="cloth_line">
+                <el-input v-model="temp.cloth_line"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="联系方式" prop="contact">
+                <el-input v-model="temp.contact"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="色号" prop="color_no">
+                <el-input v-model="temp.color_no"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="成分" prop="components">
+                <el-input v-model="temp.components"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="面料" prop="fabric">
+                <el-input v-model="temp.fabric"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="单件用量" prop="dosage">
+                <el-input v-model="temp.dosage"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="用料" prop="material">
+                <el-input v-model="temp.material"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="加工费" prop="process_fee">
+                <el-input v-model="temp.process_fee"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="辅料" prop="accessories">
+                <el-input v-model="temp.accessories"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="出厂价格" prop="factory_price">
+                <el-input v-model="temp.factory_price"></el-input>
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
-        <el-button size="small" @click="changeSku">添加sku</el-button>
-        <el-button size="small" @click="changePrice">添加价格</el-button>
-        <el-button size="small" @click="changeAttr">添加属性</el-button>
         <el-button
           type="primary"
           size="small"
@@ -141,14 +226,21 @@
 <script>
 import { mapGetters } from 'vuex'
 import { deepClone } from '@/utils'
-import { getProductList, addProduct, getProductDetail, delProduct } from '@/api/product'
-import Dropzone from '@/components/Dropzone'
+import { addProduct, getProductDetail, updateProduct } from '@/api/product'
+import factorySelect from '@/components/factorySelect';
 
 export default {
   name: 'modifyProduct',
-  components: { Dropzone },
+  components: { factorySelect },
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
+      key:1,
       textMap: {
         create: '添加商品',
         update: '编辑商品'
@@ -156,106 +248,104 @@ export default {
       dialogShow: false,
       dialogStatus: 'create',
       temp: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        sku_image: '',
-        sku: [{ value: '' }],
-        price: 0.00,
-        min: 0
+        subject: '',
+        product_cargo_number: '',
+        consign_price: '',
+        stock: '',
+        factory: '',
+        colors: [],
+        size: [],
+        size_table: [],
+        size_table_data: [],
+        cloth_line: '',
+        contact: '',
+        color_no: '',
+        components: '',
+        fabric: '',
+        dosage: '',
+        material: '',
+        process_fee: '',
+        accessories: '',
+        factory_price: '',
       },
       tempCopy: null,
-      skus: [{ image: '', attrs: [{ value: '' }] }],
-      price: [{ min: 0, price: 0.00 }],
-      attrs: [{ label: '', value: '' }],
-      rules: {},
+      rules: {
+        subject: [
+          { required: true, trigger: 'blur', message: '请填写产品名称' }
+        ],
+        product_cargo_number: [
+          { required: true, trigger: 'blur', message: '请填写产品货号' }
+        ],
+        cargo_number: [
+          { required: true, trigger: 'blur', message: '请填写产品sku货号' }
+        ]
+      },
       btnLoding: false,
       imageUpHost: process.env.VUE_APP_BASE_API + 'uploadFile',
-      previewImage: false,
-      previewImageUrl: '',
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value1: []
+      sizeTableColumns: [],
+      img: ''
+    }
+  },
+  computed: {
+    defaultColors() {
+      return this.$store.state.const.colorOptions
+    },
+    defaultSize() {
+      return this.$store.state.const.sizeOptions
+    },
+    defaultSizeTable() {
+      return this.$store.state.const.sizeTableOptions
     }
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
+    this.tempCopy = deepClone(this.temp)
+    this.tempCopy.colors = deepClone(this.defaultColors)
+    this.tempCopy.size = deepClone(this.defaultSize)
+    this.tempCopy.size_table = deepClone(this.defaultSizeTable)
+  },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
+    }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      this.resetForm('dialogForm')
+      this.$nextTick(() => {
+        if (status === 'create') {
+          this.resetForm('dialogForm')
+        } else {
+          this.getDetail()
+        }
+      })
     },
     closeDialog() {
       this.dialogShow = false
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleAdd() {
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.resetForm('dialogForm')
-      })
-    },
-    handleUpdate(row) {
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.temp = {}
-      getProductDetail({ id: row.id }).then( res => {
-        this.temp = res.response
-        this.priceColNum = Math.min(4, this.temp.price.length)
-      }).catch(() => {})
     },
     resetForm(formName) {
       if (this.$refs[formName] === undefined) {
         return false
       }
       this.$refs[formName].resetFields()
-      this.temp = Object.assign({}, this.tempCopy)
-      this.temp.sku = [{ value: '' }]
-      this.skus = [{ image: '', attrs: [{ value: '' }] }]
-      if (this.$refs['dropzoneImage0'] !== undefined) {
-        this.$refs['dropzoneImage0'][0].removeAllFiles()
-      }
+      this.temp = deepClone(this.tempCopy)
+      this.createColumns()
+    },
+    handleFilter() {
+      this.$emit('handleFilter')
     },
     submit(event) {
       this.$refs['dialogForm'].validate((valid) => {
         if (valid) {
           this.btnLoding = true
-          add(this.temp).then((res) => {
-            this.$message({
-              message: res.codemsg || '操作成功',
-              type: 'success',
-              showClose: true
-            })
-            setTimeout(() => {
-              this.dialogFormVisible = false
-              this.btnLoding = false
-              this.handleFilter()
-            }, 0.5 * 1000)
+          addProduct(this.temp).then((res) => {
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
+            this.dialogShow = false
+            this.btnLoding = false
+            this.handleFilter()
           }).catch(() => {
-            setTimeout(() => {
-              this.btnLoding = false
-            }, 0.5 * 1000)
+            this.btnLoding = false
           })
         }
       })
@@ -265,41 +355,95 @@ export default {
       const sums = [ '总计', 333, 222 ]
       return sums
     },
-    changeSku(ik, type) {
-      if (type === 'del') {
-        this.skus.splice(ik, 1)
-      } else {
-        this.skus.push({ image: '', attrs: [{ value: '' }] })
+    dropzoneS(response, file, fielList) {
+      if (response.response.code > 0) {
+        this.$message({ message: '图片上传失败', type: 'error', showClose: true })
+        return
+      }
+      this.temp.colors[response.response.k].img = response.response.path
+      this.$message({ message: '图片上传成功', type: 'success', showClose: true })
+    },
+    insertElement(type) {
+      if (typeof(this.temp[type]) !== 'undefined') {
+        this.temp[type].push({ value: true, label: '', type: 'input' })
       }
     },
-    changePrice(pk, type) {
-      if (type === 'del') {
-        this.price.splice(pk, 1)
-      } else {
-        this.price.push({ min: 0, price: 0.00 })
-      }
-    },
-    changeAttr(ak, type) {
-      if (type === 'del') {
-        this.attrs.splice(ak, 1)
-      } else {
-        this.attrs.push({ label: '', value: '' })
-      }
-    },
-    dropzoneS(file) {
-      if (file.status === 'success' && file.xhr.responseText) {
-        const response = JSON.parse(file.xhr.responseText)
-        if (response.code === 0) {
-          this.temp.sku_image = response.response.path
-          this.$message({ message: '图片上传成功', type: 'success', showClose: true })
-          return
+    delElement(type, index) {
+      if (typeof(this.temp[type]) !== 'undefined') {
+        this.temp[type].splice(index, 1)
+        if (type === 'size') {
+          this.selectSize()
+        }
+        if (type === 'size_table') {
+          this.createColumns()
         }
       }
-      this.$message({ message: '图片上传失败', type: 'error', showClose: true })
     },
-    dropzoneE(file) {
-      this.$message({ message: '只能上传一张图片', type: 'error', showClose: true })
-      this.$refs.dropzoneImage.removeFile(file)
+    createColumns() {
+      this.sizeTableColumns = this.temp.size_table.filter(i => i.value)
+    },
+    selectSize() {
+      const oldSizeTableData = deepClone(this.temp.size_table_data)
+      this.temp.size_table_data = []
+      this.temp.size.forEach(item => {
+        if (item.value) {
+          const exist = oldSizeTableData.filter(o => o.size === item.label)
+          const tmp = exist.length > 0 ? exist[0] : { size: item.label }
+          this.temp.size_table_data.push(tmp) 
+        }
+      })
+    },
+    selectFactory(value) {
+      this.temp.factory = value
+    },
+    getDetail() {
+      getProductDetail({ id: this.row.id }).then( res => {
+        this.temp = res.response
+        this.$refs.factorySelectRef.setValue(this.temp.factory)
+        this.temp.colors = this.getDefaultData(this.defaultColors, res.response.colors)
+        this.temp.size = this.getDefaultData(this.defaultSize, res.response.size)
+        this.temp.size_table = this.getDefaultData(this.defaultSizeTable, res.response.size_table, true)
+        this.selectSize()
+        this.createColumns()
+      }).catch(() => {})
+    },
+    getDefaultData(source, target, defaultValue) {
+      defaultValue = defaultValue || false
+      let result = []
+      source.forEach(item => {
+        let exist = []
+        if (target.length > 0) {
+          exist = target.filter(t => t.label === item.label)
+        }
+        if (exist.length === 0) {
+          item.value = defaultValue
+          result.push(item)
+        } else {
+          target.splice(target.indexOf(exist[0]), 1)
+          result.push(exist[0])
+        }
+      })
+      if (target.length > 0) {
+        target.map(tar => {
+          result.push(tar)
+        })
+      }
+      return result
+    },
+    updateData() {
+      this.$refs['dialogForm'].validate((valid) => {
+        if (valid) {
+          this.btnLoding = true
+          updateProduct(this.temp).then((res) => {
+            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
+            this.dialogShow = false
+            this.btnLoding = false
+            this.handleFilter()
+          }).catch(() => {
+            this.btnLoding = false
+          })
+        }
+      })
     }
   }
 }
@@ -320,7 +464,6 @@ export default {
   margin-top: 5vh !important;
 }
 /deep/.dz-preview {
-  width: 93.5% !important;
   display: inherit;
 }
 .sku-btn-group, .price-btn-group, .attr-btn-group {
@@ -328,5 +471,34 @@ export default {
 }
 .divider-icon {
   margin-right: 5px;
+}
+.form-container-sku-sizetable {
+  padding-bottom: 20px;
+}
+.avatar-uploader {
+  line-height: 10px;
+}
+.avatar-uploader /deep/.el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 118px;
+  height: 118px;
+  line-height: 118px;
+  text-align: center;
+}
+.avatar {
+  width: 118px;
+  height: 118px;
+  display: block;
 }
 </style>

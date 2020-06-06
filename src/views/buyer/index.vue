@@ -2,11 +2,17 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
+        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" @click="handleAdd" v-show="checkPermission('addBuyer')">
+          添加
+        </el-button>
         <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" @click="handleFilter" v-show="checkPermission('getBuyerList')">
           查询
         </el-button>
       </div>
       <el-input v-model="listQuery.buyer_login_id" placeholder="请输入买家名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.type" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="买家类型" clearable>
+        <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
       <el-date-picker class="filter-item"
         v-model="listQuery.times"
         type="datetimerange"
@@ -36,19 +42,13 @@
           <span>{{ scope.row.buyer_login_id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="买家id" min-width="170px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.buyer_member_id }}</span>
-        </template>
+      <el-table-column label="订单数量" width="120px" align="center" sortable prop="order_num">
       </el-table-column>
-      <el-table-column label="订单数量" width="120px" align="center" sortable>
-        <template slot-scope="scope">
-          <el-tag>{{ scope.row.order_num }}</el-tag>
-        </template>
+      <el-table-column label="订单金额" width="150px" align="center" sortable prop="order_amount">
       </el-table-column>
-      <el-table-column label="订单金额" width="150px" align="center" sortable>
+      <el-table-column label="买家类型" align="center">
         <template slot-scope="scope">
-          <el-tag type="danger"><i class="el-icon-money" style="margin-right: 10px"/>{{ scope.row.order_amount }}</el-tag>
+          <el-tag :type="scope.row.type === '1' ? 'danger' : ''">{{ typeMap[scope.row.type] }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="同步时间" width="160px" align="center" sortable prop="created_at">
@@ -59,13 +59,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateBuyer')">
-            <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="订单列表" placement="bottom-end" v-show="checkPermission('getOrderList')">
-            <el-button icon="el-icon-s-order" size="mini" type="primary">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-s-order" size="mini" type="primary" @click="handleOrderList(scope.row)">订单列表</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -97,6 +92,12 @@ export default {
     ]),
     pickerOptions() {
       return this.$store.state.const.pickerOptions
+    },
+    typeOptions() {
+      return this.$store.state.const.buyerTypeList
+    },
+    typeMap() {
+      return this.$store.state.const.buyerTypeMap
     }
   },
   data() {
@@ -121,7 +122,11 @@ export default {
   },
   methods: {
     checkPermission(check) {
+      return true
       return checkPermission(this.permissions, check)
+    },
+    handleAdd() {
+      this.$refs.modifyBuyerDialog.showDialog('create')
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -145,10 +150,12 @@ export default {
           this.listLoading = false
         }, 0.5 * 1000)
       }).catch(() => {
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
+        this.listLoading = false
       })
+    },
+    handleOrderList(row) {
+      this.$store.dispatch('const/setQuery', { buyer_login_id: row.buyer_login_id })
+      this.$router.push('/order/index')
     }
   }
 }

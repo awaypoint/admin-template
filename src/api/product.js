@@ -24,9 +24,9 @@ export function addProduct(data) {
   })
 }
 
-export function update(data) {
+export function updateProduct(data) {
   return request({
-    url: 'updateFactory',
+    url: 'updateProduct',
     method: 'post',
     data
   })

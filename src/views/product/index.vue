@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addProduct')" @click="handleModify('create')">
+        <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addProduct')" @click="handleAdd()">
           添加
         </el-button>
         <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getProductList')" @click="handleFilter">
@@ -32,8 +32,6 @@
       fit
       highlight-current-row
       style="width: 100%;"
-      show-summary
-      :summary-method="getSummaries"
       @sort-change="sortChange"
     >
       <el-table-column label="产品名称" min-width="250px" align="left">
@@ -41,20 +39,11 @@
           <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
         </template>
       </el-table-column>
-      <el-table-column label="货号" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.product_cargo_number }}</span>
-        </template>
+      <el-table-column label="货号" min-width="160px" align="center" prop="product_cargo_number">
       </el-table-column>
-      <el-table-column label="销售价" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.consign_price }}</span>
-        </template>
+      <el-table-column label="销售价" align="center" prop="consign_price">
       </el-table-column>
-      <el-table-column label="平台价" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.consign_price }}</span>
-        </template>
+      <el-table-column label="平台价" align="center" prop="platform_price">
       </el-table-column>
       <el-table-column label="上架时间" width="160px" align="center" sortable prop="created_at">
         <template slot-scope="scope">
@@ -64,16 +53,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateFactory')">
-            <el-button size="mini" icon="el-icon-view" @click="handleView(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateFactory')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleModify(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delFactroy')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button v-if="scope.row.alibaba === '0'" icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -85,7 +66,7 @@
       @pagination="getList"
     />
     <viewProductDialog ref="viewProductDialog" :row="productRow"></viewProductDialog>
-    <modifyProductDialog ref="modifyProductDialog"></modifyProductDialog>
+    <modifyProductDialog ref="modifyProductDialog" :row="productRow" @handleFilter="handleFilter"></modifyProductDialog>
   </div>
 </template>
 
@@ -137,8 +118,12 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleModify(status) {
-      this.$refs.modifyProductDialog.showDialog(status)
+    handleAdd() {
+      this.$refs.modifyProductDialog.showDialog('create')
+    },
+    handleUpdate(row) {
+      this.productRow = row
+      this.$refs.modifyProductDialog.showDialog('update')
     },
     handleView(row) {
       this.productRow = row
@@ -158,31 +143,20 @@ export default {
           this.listLoading = false
         }, 0.5 * 1000)
       }).catch(() => {
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
+        this.listLoading = false
       })
     },
     handleDelete(id) {
-      this.$confirm('此操作将永久删除该厂家, 是否继续?', '提示', {
+      this.$confirm('此操作将永久删除该产品, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        del({ 'id': id }).then((res) => {
-          this.$message({
-            message: res.codemsg || '操作成功',
-            type: 'success',
-            showClose: true
-          })
+        delProduct({ 'id': id }).then((res) => {
+          this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
           this.handleFilter()
         })
       }).catch(() => {})
-    },
-    getSummaries(params) {
-      const { columns, data } = params
-      const sums = [ '总计', 333, 222 ]
-      return sums
     }
   }
 }

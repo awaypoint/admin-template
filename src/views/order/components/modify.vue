@@ -16,7 +16,7 @@
             </el-col>
             <el-col :span="21">
               <span class="order-aside-span">{{ temp.order_id }}</span>
-              <el-tag type="danger">{{ temp.status_name }}</el-tag>
+              <el-tag type="danger">{{ statusMap[temp.status] }}</el-tag>
               <el-tag type="info" v-show="temp.type === '2'">{{ typeMap[temp.type] }}</el-tag>
             </el-col>
           </el-row>
@@ -25,8 +25,8 @@
               <div class="order-aside-label">收件人:</div>
             </el-col>
             <el-col :span="21">
-              <span class="order-aside-span">{{ temp.to_full_name }}</span>
-              <el-tag :span="2">{{ temp.buyer_login_id }}</el-tag>
+              <el-tag :span="2">{{ temp.to_full_name }}</el-tag>
+              <span class="order-aside-span">{{ temp.buyer_login_id }}</span>
             </el-col>
           </el-row>
           <el-row :gutter="20">
@@ -55,15 +55,38 @@
           </el-row>
           <el-row :gutter="20">
             <el-col :span="3">
+              <div class="order-aside-label">快递单号:</div>
+            </el-col>
+            <el-col :span="21">
+              <span class="order-aside-span">{{ temp.shipping_company }}</span>
+              <el-tag>{{ temp.shipping_no }}</el-tag>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="3">
+              <div class="order-aside-label">运费:</div>
+            </el-col>
+            <el-col :span="9">
+              <span class="order-aside-span">{{ temp.shipping_fee }}</span>
+            </el-col>
+            <el-col :span="3">
+              <div class="order-aside-label">总金额:</div>
+            </el-col>
+            <el-col :span="9">
+              <el-tag type="danger" effect="dark"> ￥{{ temp.total_amount }} </el-tag>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="3">
               <div class="order-aside-label">下单时间:</div>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="9">
               <span class="order-aside-span">{{ temp.order_created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-col>
             <el-col :span="3">
               <div class="order-aside-label">付款时间:</div>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="9">
               <span class="order-aside-span">{{ temp.order_paid_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-col>
           </el-row>
@@ -71,61 +94,26 @@
             <el-col :span="3">
               <div class="order-aside-label">修改时间:</div>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="9">
               <span class="order-aside-span">{{ temp.order_modified_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-col>
             <el-col :span="3">
               <div class="order-aside-label">同步时间:</div>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="9">
               <span class="order-aside-span">{{ temp.updated_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-col>
           </el-row>
-          <div class="aside-amount">
-            <svg-icon icon-class="white-money" class="asidt-amount-svg"/>
-            <div class="aside-amount-number">{{ temp.sum_pay_ment }}</div>
-          </div>
+          <el-row :gutter="20">
+            <el-col :span="3">
+              <div class="order-aside-label">买家留言:</div>
+            </el-col>
+            <el-col :span="21">
+              <span class="order-aside-span">{{ temp.buyer_feed_back }}</span>
+            </el-col>
+          </el-row>
         </aside>
       </div>
-      <el-form
-        ref="dialogForm"
-        :rules="rules"
-        :model="temp"
-        label-position="right"
-        label-width="120px"
-        class="dialog-form-cls"
-      >
-        <el-row :gutter="30">
-          <el-col :span="12">
-            <el-form-item label="线上\线下单" prop="role_id">
-              <el-select v-model="temp.resource" placeholder="请选择" style="width:100%">
-                <el-option v-for="item in resourceOptions" :key="item.key" :label="item.label" :value="item.key" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="线下单运费" prop="resource">
-              <el-input v-model="temp.resource"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="30">
-          <el-col :span="12" style="text-align: rigth">
-            <el-form-item label="实际运费" prop="type">
-              <el-input v-model="temp.resource"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="补差金额" prop="resource">
-              <el-input v-model="temp.resource"/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="备注" prop="desc">
-          <el-input v-model="temp.desc" type="textarea"/>
-        </el-form-item>
-      </el-form>
-      <el-divider></el-divider>
       <el-table
         row-key="id"
         :data="temp.products"
@@ -136,14 +124,14 @@
         style="width: 100%;"
         ref="dialogTable"
       >
-        <el-table-column type="index" :index="indexMethod" align="center">
+        <el-table-column type="index" align="center" label="序号" width="50px">
         </el-table-column>
         <el-table-column label="货号" width="100px" align="center" sortable prop='cargo_number'>
           <template slot-scope="scope">
             <productPopover :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
           </template>
         </el-table-column>
-        <el-table-column label="sku" min-width="100px" align="center" prop="quantity">
+        <el-table-column label="sku" min-width="120px" align="center" prop="quantity">
           <template slot-scope="scope" >
             <el-tag 
               v-for="(sku, index) in scope.row.sku_info"
@@ -157,31 +145,12 @@
           </template>
         </el-table-column>
         <el-table-column label="产品数量" min-width="100px" align="center" prop="quantity">
-          <template slot-scope="scope" >
-            <el-input 
-              v-model="scope.row.quantity"
-              v-if="scope.row.editable"
-              class="edit-input" size="small"
-            />
-            <span v-else>{{ scope.row.quantity }}</span>
-          </template>
         </el-table-column>
-        <el-table-column label="价格" min-width="140px" align="center">
-          <template slot-scope="scope">
-            <el-input 
-              v-model="scope.row.price"
-              v-if="scope.row.editable"
-              class="edit-input" size="small"
-            />
-            <span v-else>{{ scope.row.price }}</span>
-          </template>
+        <el-table-column label="价格" min-width="140px" align="center" prop="price">
         </el-table-column>
-        <el-table-column label="折扣" min-width="140px" align="center">
-          <template slot-scope="scope">
-            <span>{{ scope.row.discount }}</span>
-          </template>
+        <el-table-column label="折扣" width="100px" align="center" prop="discount">
         </el-table-column>
-        <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
+        <!-- <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
           <template slot="header">
             <addProduct ref="addProduct"></addProduct>
           </template>
@@ -200,16 +169,12 @@
               </el-button>
             </el-tooltip>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
-        <el-button 
-          type="primary" 
-          size="small" 
-          :loading="btnLoding"
-          @click="closeDialog"
-        >确认</el-button>
+        <el-button type="primary" size="small" :loading="btnLoding" @click="closeDialog">确认</el-button>
+        <el-button type="primary" size="small" @click="handlePrinte">打印</el-button>
       </div>
     </el-dialog>
   </div>
@@ -235,7 +200,8 @@ export default {
     return {
       textMap: {
         update: '编辑订单',
-        create: '添加订单'
+        create: '添加订单',
+        view: '查看订单',
       },
       dialogShow: false,
       dialogStatus: '',
@@ -271,10 +237,13 @@ export default {
       'permissions'
     ]),
     typeMap() {
-      return this.$store.state.const.orderTypeMap
+      return this.$store.state.order.orderTypeMap
     },
     resourceOptions() {
-      return this.$store.state.const.orderResourceOptions
+      return this.$store.state.order.orderResourceOptions
+    },
+    statusMap() {
+      return this.$store.state.order.orderStatusMap
     }
   },
   methods: {
@@ -295,7 +264,7 @@ export default {
       })
     },
     closeDialog() {
-      this.$refs.addProduct.close()
+      // this.$refs.addProduct.close()
       this.dialogShow = false
     },
     resetForm(formName) {
@@ -308,52 +277,19 @@ export default {
     handleFilter() {
       this.$emit('handleFilter')
     },
-    submit(event) {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          addFactory(this.temp).then((res) => {
-            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
-            this.dialogShow = false
-            this.btnLoding = false
-            this.handleFilter()
-          }).catch(() => {
-            this.btnLoding = false
-          })
-        }
-      })
-    },
-    updateData() {
-      this.$refs['dialogForm'].validate((valid) => {
-        if (valid) {
-          this.btnLoding = true
-          updateFactory(this.temp).then((res) => {
-            this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
-            this.dialogShow = false
-            this.btnLoding = false
-            this.handleFilter()
-          }).catch(() => {
-            this.btnLoding = false
-          })
-        }
-      })
-    },
-    handleEditRow(row) {
-      row.editable = !row.editable
-    },
-    indexMethod(index) {
-      return index + 1
-    },
     getSummaries(params) {
-      const { columns, data } = params
-      const sums = [ '', '总计', '', 15615, 15615 ]
-      return sums
-    }
+      return [ '', '总计', '', this.temp.product_num, this.temp.sum_product_payment ]
+    },
+    handlePrinte() {
+      const list = [this.row.id]
+      this.$store.dispatch('order/setSelectOrders', list)
+      const routeData = this.$router.resolve({ path: '/printe' });
+      window.open(routeData.href, '_blank');
+    },
   }
 }
 </script>
 <style lang="scss" scoped>
-
 /deep/.el-dialog {
   margin-top: 3vh !important;
   margin-bottom: 5vh;

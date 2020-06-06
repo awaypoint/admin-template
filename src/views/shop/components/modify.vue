@@ -19,11 +19,6 @@
         <el-form-item label="店铺名称" prop="name">
           <el-input v-model="temp.name"/>
         </el-form-item>
-        <el-form-item label="店铺类型" prop="role_id">
-          <el-select v-model="temp.type" placeholder="请选择" clearable style="width:100%">
-            <el-option v-for="item in typeList" :key="item.key" :label="item.label" :value="item.key" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="描述" prop="desc">
           <el-input v-model="temp.desc" type="textarea"/>
         </el-form-item>
@@ -81,14 +76,6 @@ export default {
       handler(val) {}
     }
   },
-  computed: {
-    typeList() {
-      return this.$store.state.const.shopTypeList
-    },
-    typeMap() {
-      return this.$store.state.const.shopTypeMap
-    }
-  },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
@@ -97,7 +84,7 @@ export default {
         if (status === 'create') {
           this.resetForm('dialogForm')
         } else {
-          this.temp = this.row
+          this.temp = Object.assign({}, this.row)
         }
       })
     },

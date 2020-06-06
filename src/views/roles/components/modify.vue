@@ -15,18 +15,22 @@
         label-width="110px"
         class="dialog-form-cls"
       >
-        <el-form-item label="角色名称：" prop="name">
+        <el-form-item label="角色名称" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
 
-        <el-form-item label="状态：" prop="state">
+        <el-form-item label="状态" prop="state">
           <el-switch v-model="temp.status" active-color="#13ce66" active-value="1" inactive-value="2" />
         </el-form-item>
-        <el-form-item label="描述：" prop="desc">
+        <!-- <el-form-item label="厂家" prop="factory">
+          <factorySelect ref="factorySelectRef" @selectFactory="selectFactory"></factorySelect>
+          <span style="color:red;">注:选择了厂家的角色只能看到该厂家的数据</span>
+        </el-form-item> -->
+        <el-form-item label="描述" prop="desc">
           <el-input v-model="temp.desc" type="textarea" />
         </el-form-item>
         <hr class="el-divider">
-        <el-form-item label="拥有权限：" prop="permission" class="permission-form-cls">
+        <el-form-item label="拥有权限" prop="permission" class="permission-form-cls">
           <el-form-item v-for="(permission,idx) of permissionList" :key="idx" label-width="0px">
             <el-checkbox
               v-model="permission.checkedAll"
@@ -65,9 +69,17 @@
 
 <script>
 import { addRole, updateRole, getAllMenus, getRolePermission } from '@/api/system'
+import factorySelect from '@/components/factorySelect';
 
 export default {
   name: 'modifyRole',
+  props: {
+    row: {
+      type: Object,
+      required: true
+    }
+  },
+  components: { factorySelect },
   data() {
     return {
       textMap: {
@@ -83,40 +95,46 @@ export default {
         name: '',
         desc: '',
         status: '1',
+        factory: '0',
         permissions: []
       },
       rules: {
-        code: [
-          { required: true, trigger: 'blur', message: '识别码不能为空' }
-        ],
         name: [
           { required: true, trigger: 'blur', message: '角色名称不能为空' }]
       }
     }
   },
-   computed: {
+  computed: {
     permissionList() {
       return this.$store.state.role.permissionList
+    }
+  },
+  watch: {
+    row: {
+      deep: true,
+      handler(val) {}
     }
   },
   methods: {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
-      if (status === 'create') {
-        this.$nextTick(() => {
-          this.resetForm('dialogForm')
-        })
-      } else {
-        this.temp = this.$store.state.role.row
-        if (this.temp.permissions.length === 0) {
-          getRolePermission({ 'id': this.temp.id }).then(res => {
-            this.permissions2Menus(res.response)
-          }).catch(() => {})
+
+      this.$nextTick(() => {
+        if (status === 'create') {
+            this.resetForm('dialogForm')
         } else {
-          this.permissions2Menus(this.temp.permissions)
+          this.temp = Object.assign({}, this.row)
+          if (this.temp.permissions.length === 0) {
+            getRolePermission({ 'id': this.temp.id }).then(res => {
+              this.permissions2Menus(res.response)
+            }).catch(() => {})
+          } else {
+            this.permissions2Menus(this.temp.permissions)
+          }
+          // this.$refs.factorySelectRef.setValue(this.temp.factory)
         }
-      }
+      })
     },
     closeDialog() {
       this.dialogShow = false
@@ -131,6 +149,9 @@ export default {
         this.permissionList[key].checkedAll = false
         this.permissionList[key].indeterminate = false
       })
+      if (this.$refs.factorySelectRef !== undefined) {
+        this.$refs.factorySelectRef.setValue('')
+      }
       this.$refs[formName].resetFields()
       this.temp = Object.assign({}, this.defaultTemp)
     },
@@ -214,6 +235,9 @@ export default {
           }
         }
       })
+    },
+    selectFactory(value) {
+      this.temp.factory = value
     }
   }
 }
@@ -226,7 +250,7 @@ export default {
   margin-left: 20px;
 }
 .permission-form-cls {
-  max-height: 40vh;
+  max-height: 60vh;
   overflow: scroll;
   overflow-y: auto;
   margin-bottom: 0px;

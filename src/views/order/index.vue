@@ -5,19 +5,24 @@
         <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getOrderList')" @click="handleFilter">
           查询
         </el-button>
+        <el-button class="filter-item pan-btn green-btn" type="primary" icon="el-icon-printer" v-show="checkPermission('getOrderList')" @click="handlePrinte">
+          打印
+        </el-button>
       </div>
       <el-input v-model="listQuery.order_id" placeholder="请输入订单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.status" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
-        <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
+      <el-select v-model="listQuery.status" style="width: 160px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
+        <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
       <el-select v-model="listQuery.type" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="类型" clearable>
         <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
+      <el-input v-model="listQuery.buyer_login_id" placeholder="请输入买家" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
     </div>
 
     <el-table
       :key="tableKey"
       v-loading="listLoading"
+      ref="orderTableRef"
       :data="list"
       border
       fit
@@ -27,21 +32,16 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="订单号" min-width="200px" align="center">
+      <el-table-column type="selection" width="50px" align="center"></el-table-column>
+      <el-table-column label="订单号" min-width="150px" align="center">
         <template slot-scope="scope">
           <el-tag :type="scope.row.type == 2 ? 'info' : 'success'">{{ typeMap[scope.row.type] }}</el-tag>
           <span>{{ scope.row.order_id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="产品数量" min-width="100px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.sum_pay_ment }}</span>
-        </template>
+      <el-table-column label="产品数量" min-width="80px" align="center" prop="product_num">
       </el-table-column>
-      <el-table-column label="总金额" min-width="140px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.sum_pay_ment }}</span>
-        </template>
+      <el-table-column label="总金额" min-width="120px" align="center" prop="total_amount">
       </el-table-column>
       <el-table-column label="买家" min-width="160px" align="center">
         <template slot-scope="scope">
@@ -50,14 +50,9 @@
           <span>{{ scope.row.buyer_login_id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="150px" align="center">
+      <el-table-column label="状态" width="150px" align="center" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-switch
-            v-model="scope.row.status"
-            active-color="#13ce66"
-            active-value="1" inactive-value="2"
-            @change="handleModifyState(scope.row)"
-          />
+          <span>{{ statusMap[scope.row.status] }}</span>
         </template>
       </el-table-column>
       <el-table-column label="下单时间" width="160px" align="center" sortable prop="created_at">
@@ -68,13 +63,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateOrder')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="打印订单" placement="bottom-end" v-show="checkPermission('printOrder')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-view" @click="handleUpdate(scope.row)">查看</el-button>
+          <el-button icon="el-icon-brush" size="mini" type="danger" @click="handleBrush(scope.row.id)">{{ scope.row.type === '1' ? '刷单' : '取消刷单' }}
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -92,7 +83,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { getOrderList } from '@/api/order'
+import { getOrderList, brushOrder } from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
 import modifyOrderDialog from './components/modify';
@@ -105,16 +96,18 @@ export default {
       tableKey: 0,
       list: [],
       total: 0,
+      sum: {},
       listLoading: true,
       listQuery: {
         page: 1,
         page_size: 10,
         order_id: undefined,
         status: undefined,
+        buyer_login_id: '',
         order_by: undefined,
         sort_by: undefined
       },
-      orderRow: {},
+      orderRow: {}
     }
   },
   computed: {
@@ -122,18 +115,31 @@ export default {
       'permissions'
     ]),
     typeOptions() {
-      return this.$store.state.const.orderTypeOptions
+      return this.$store.state.order.orderTypeOptions
     },
     typeMap() {
-      return this.$store.state.const.orderTypeMap
+      return this.$store.state.order.orderTypeMap
     },
+    query() {
+      return this.$store.state.order.query
+    },
+    statusOptions() {
+      return this.$store.state.order.orderStatusOptions
+    },
+    statusMap() {
+      return this.$store.state.order.orderStatusMap
+    }
   },
   created() {
-    this.tempCopy = Object.assign({}, this.temp)
+    if (this.query) {
+      this.listQuery = Object.assign(this.listQuery, this.query)
+      this.$store.dispatch('const/setQuery', {})
+    }
     this.getList()
   },
   methods: {
     checkPermission(check) {
+      return true
       return checkPermission(this.permissions, check)
     },
     handleFilter() {
@@ -142,54 +148,47 @@ export default {
     },
     handleUpdate(row) {
       this.orderRow = row
-      this.$refs.modifyOrderDialog.showDialog('update')
+      this.$refs.modifyOrderDialog.showDialog('view')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
       this.listQuery.sort_by = column.order === "descending" ? 'DESC' : 'ASC'
       this.handleFilter()
     },
-    handleModifyState(row) {
-      const upData = {
-        'id': row.id,
-        'status': row.status
-      }
-      this.modifyFactory(upData, false)
-    },
     getList() {
       this.listLoading = true
       getOrderList(this.listQuery).then(res => {
         this.list = res.response.rows
         this.total = res.response.total
+        this.sum = res.response.sum
         setTimeout(() => {
           this.listLoading = false
         }, 0.5 * 1000)
       }).catch(() => {
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
+        this.listLoading = false
       })
     },
-    handleDelete(id) {
-      this.$confirm('此操作将永久删除该厂家, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        del({ 'id': id }).then((res) => {
-          this.$message({
-            message: res.codemsg || '操作成功',
-            type: 'success',
-            showClose: true
-          })
-          this.handleFilter()
-        })
-      }).catch(() => {})
-    },
     getSummaries(params) {
-      const { columns, data } = params
-      const sums = [ '总计', 333, 222 ]
-      return sums
+      return ['', '总计', this.sum.product_num, this.sum.total_amount]
+    },
+    handlePrinte() {
+      const selection = this.$refs.orderTableRef.selection
+      const list = selection.map(s => {
+        return s.id
+      })
+      if (list.length <= 0) {
+        this.$message({ message: '请先选择需要打印的订单', type: 'warning', showClose: true })
+        return
+      }
+      this.$store.dispatch('order/setSelectOrders', list)
+      const routeData = this.$router.resolve({ path: '/printe' });
+      window.open(routeData.href, '_blank');
+    },
+    handleBrush(id) {
+      brushOrder({ id: id }).then( res => {
+        this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
+        this.handleFilter()
+      }).catch(() => {})
     }
   }
 }

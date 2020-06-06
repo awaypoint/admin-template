@@ -32,22 +32,17 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="用户名" min-width="200px" align="center">
+      <el-table-column label="用户名" min-width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="昵称" width="200px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.nickname }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="手机号" width="200px" align="center">
+      <el-table-column label="手机号" width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.mobile }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="角色" width="150px" align="center">
+      <el-table-column label="角色" width="120px" align="center">
         <template slot-scope="scope">
           <el-tag style="margin:0 5px;" v-show="scope.row.role_id > 0"> {{ rolesMap[scope.row.role_id] }} </el-tag>
         </template>
@@ -60,7 +55,6 @@
             active-value="1" inactive-value="2"
             @change="handleModifyState(scope.row)"
           />
-
         </template>
       </el-table-column>
       <el-table-column label="创建时间" width="160px" align="center">
@@ -71,17 +65,11 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('modifyUser')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delUser')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="重置密码" placement="bottom-end" v-show="checkPermission('resetPwd')">
-            <el-button icon="el-icon-s-help" size="mini" type="primary" @click="resetPwd(scope.row, $event)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除
+          </el-button>
+          <el-button icon="el-icon-s-help" size="mini" type="primary" @click="resetPwd(scope.row, $event)">重置密码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -220,6 +208,7 @@ export default {
   },
   methods: {
     checkPermission(check) {
+      return true
       return checkPermission(this.permissions, check)
     },
     handleModifyState(row) {
@@ -361,7 +350,10 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
+/deep/.el-table th {
+  padding: 11px 0;
+}
 .userFormCls {
   padding-right: 20px;
 }

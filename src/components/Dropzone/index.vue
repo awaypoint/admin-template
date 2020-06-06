@@ -96,13 +96,13 @@ export default {
       thumbnailHeight: this.thumbnailHeight,
       maxFiles: this.maxFiles,
       maxFilesize: this.maxFilesize,
-      dictRemoveFile: 'Remove',
+      dictRemoveFile: '删除',
       addRemoveLinks: this.showRemoveLink,
       acceptedFiles: this.acceptedFiles,
       autoProcessQueue: this.autoProcessQueue,
-      dictDefaultMessage: '<i style="margin-top: 3em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i><br>Drop files here to upload',
-      dictMaxFilesExceeded: '只能一个图',
-      previewTemplate: '<div class="dz-preview dz-file-preview">  <div class="dz-image" style="width:100%;height:' + this.thumbnailHeight + 'px" ><img style="width:100%;height:' + this.thumbnailHeight + 'px" data-dz-thumbnail /></div>  <div class="dz-details"><div class="dz-size"><span data-dz-size></span></div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>  <div class="dz-error-message"><span data-dz-errormessage></span></div>  <div class="dz-success-mark"> <i class="material-icons">done</i> </div>  <div class="dz-error-mark"><i class="material-icons">error</i></div></div>',
+      dictDefaultMessage: '<i style="margin-top: 0em;display: inline-block" class="material-icons">' + this.defaultMsg + '</i>',
+      dictMaxFilesExceeded: '只能上传一个图',
+      previewTemplate: '<div class="dz-preview dz-file-preview" style="margin:0 0 0 4px;">  <div class="dz-image" style="width:100%;height:auto;"><img style="width:100%;" data-dz-thumbnail /></div>  <div class="dz-details"><div class="dz-size"><span data-dz-size></span></div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>  <div class="dz-error-message"><span data-dz-errormessage></span></div>  <div class="dz-success-mark"> <i class="material-icons">done</i> </div>  <div class="dz-error-mark"><i class="material-icons">error</i></div></div>',
       init() {
         const val = vm.defaultImg
         if (!val) return
@@ -214,10 +214,7 @@ export default {
         color: #777;
         transition: background-color .2s linear;
         padding: 5px;
-    }
-
-    .dropzone:hover {
-        background-color: #F6F6F6;
+        min-height: auto;
     }
 
     i {
@@ -226,7 +223,6 @@ export default {
 
     .dropzone .dz-image img {
         width: 100%;
-        height: 100%;
     }
 
     .dropzone input[name='file'] {
@@ -235,13 +231,6 @@ export default {
 
     .dropzone .dz-preview .dz-image {
         border-radius: 0px;
-    }
-
-    .dropzone .dz-preview:hover .dz-image img {
-        transform: none;
-        filter: none;
-        width: 100%;
-        height: 100%;
     }
 
     .dropzone .dz-preview .dz-details {
@@ -255,15 +244,6 @@ export default {
 
     .dropzone .dz-preview .dz-details .dz-filename span, .dropzone .dz-preview .dz-details .dz-size span {
         background-color: transparent;
-    }
-
-    .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {
-        border: none;
-    }
-
-    .dropzone .dz-preview .dz-details .dz-filename:hover span {
-        background-color: transparent;
-        border: none;
     }
 
     .dropzone .dz-preview .dz-remove {
@@ -281,10 +261,6 @@ export default {
         font-weight: 800;
         letter-spacing: 1.1px;
         opacity: 0;
-    }
-
-    .dropzone .dz-preview:hover .dz-remove {
-        opacity: 1;
     }
 
     .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {

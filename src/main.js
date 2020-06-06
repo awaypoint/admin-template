@@ -14,7 +14,6 @@ import store from './store'
 import router from './router'
 
 import * as filters from './filters' // global filters
-import '@/functions'
 import '@/icons' // icon
 import '@/permission' // permission control
 
