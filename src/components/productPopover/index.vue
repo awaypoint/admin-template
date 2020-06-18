@@ -9,7 +9,7 @@
     >
     </el-image>
     <span class="popover-span">{{ data.subject }}</span>
-    <a class="popover-a" slot="reference">{{ reference }}</a>
+    <a class="popover-a" slot="reference" @click="click">{{ reference }}</a>
   </el-popover>
 </template>
 
@@ -22,10 +22,16 @@ export default {
   },
   props: {
     data: {
+      id: '',
       image: '',
       subject: ''
     },
     reference: ''
+  },
+  methods: {
+    click() {
+      this.$emit('click', this.data)
+    }
   }
 }
 </script>

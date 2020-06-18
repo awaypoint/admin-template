@@ -4,7 +4,7 @@
       :close-on-click-modal="false" 
       :title="textMap[dialogStatus]" 
       :visible.sync="dialogShow" 
-      width="800px" 
+      width="930px" 
       ref="childForm"
       @close="closeDialog"
     >
@@ -18,30 +18,36 @@
       >
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="入库来源店铺" prop="shop">
-              <shopSelect ref="selectShopRef" @selectShop="selectShop"></shopSelect>
+            <el-form-item label="买家">
+              <buyerSelect ref="buyerSelectRef" :type="2" @selectBuyer="selectBuyer" :disabled="this.temp.order_id !== ''"></buyerSelect>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="运费" prop="shipping">
-              <el-input v-model="temp.shipping"/>
+          <el-col :span="12" v-if="temp.order_id">
+            <el-form-item label="订单号">
+              <el-input v-model="temp.order_id" readonly/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="10">
-          <el-col :span="10">
-            <el-form-item label="快递单号" prop="shop">
-              <expressSelect ref="selectExpressRef" @selectExpress="selectExpress"></expressSelect>
+          <el-col :span="12">
+            <el-form-item label="运费">
+              <el-input v-model="temp.shipping_fee"/>
             </el-form-item>
           </el-col>
-          <el-col :span="14">
-            <el-input v-model="temp.express_no"/>
+          <el-col :span="12">
+            <el-form-item label="快递单号">
+              <el-input v-model="temp.shipping_no"/>
+            </el-form-item>
           </el-col>
         </el-row>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="temp.remark" type="textarea"/>
         </el-form-item>
       </el-form>
+      <el-divider></el-divider>
+      <div v-if="dialogStatus === 'create'">
+        <productBtnGroup templateType="stockout" @insertProduct="insertProduct"></productBtnGroup>
+      </div>
       <el-table
         row-key="id"
         :data="temp.goods"
@@ -49,59 +55,81 @@
         highlight-current-row
         style="width: 100%;"
         ref="dialogTable"
+        default-expand-all
+        :summary-method="getSummaries"
+        show-summary
+        :row-class-name="tableRowClassName"
       >
-        <el-table-column type="index" :index="indexMethod" align="center">
-        </el-table-column>
-        <el-table-column label="货号" width="100px" align="center" sortable prop='cargo_number'>
-          <template slot-scope="scope">
-            <productPopover :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
+        <el-table-column type="index" align="center" label="序号" width="50"></el-table-column>
+        <el-table-column label="货号/尺码" min-width="150px" align="center" prop='cargo_number'>
+          <template slot-scope="scope" >
+            <productPopover v-if="!scope.row.leaf" :data="scope.row" :reference="scope.row.cargo_number"></productPopover>
+            <span v-else>{{ scope.row.size }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="SKU" min-width="160px" align="center" prop="attr_arr">
-          <template slot-scope="scope" >
-            <el-tag 
-              v-for="(attr, index) in scope.row.attr_arr"
-              :key="index"
-              effect="dark"
-              :type="tagTypeArr[index % 5]"
-              style="margin-right: 5px;"
-            >
-            {{ attr }}
-            </el-tag>
+        <el-table-column label="出库价格" width="200px" align="center" prop="price">
+          <template slot="header" slot-scope="scope">
+            <div :class="priceCls">
+              <span>出库价格</span>
+              <el-input
+                v-if="dialogStatus === 'create'"
+                v-model="diff"
+                size="mini"
+                @mousewheel.native.prevent 
+                @input="multPrice"
+                placeholder="输入价格"/>
+            </div>
           </template>
-        </el-table-column>
-        <el-table-column label="出库价格" min-width="100px" align="center" prop="price">
-          <template slot-scope="scope" >
+          <template slot-scope="scope" v-if="!scope.row.leaf">
             <el-input 
+              v-if="dialogStatus === 'create'"
               v-model="scope.row.price"
               class="edit-input"
-              size="small"
+              size="mini"
+              type="number"
+              @mousewheel.native.prevent 
+              @input="sumary"
             />
+            <span v-else>{{ scope.row.price }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="数量" width="100px" align="center">
+        <el-table-column v-if="dialogStatus === 'create'" label="库存" width="100px" align="center" prop="stock"></el-table-column>
+        <el-table-column label="数量" min-width="150px" align="center" prop="quantity">
           <template slot-scope="scope">
-            <el-input 
-              v-model="scope.row.quantity"
-              class="edit-input"
-              size="small"
-            />
+            <div :class="priceCls">
+              <div v-if="temp.order_id" class="price-div">
+                <el-tag type="info" size="small">{{ scope.row.order_quantity || 0 }}</el-tag>/
+              </div>
+              <el-input 
+                v-if="dialogStatus === 'create' && scope.row.leaf"
+                v-model="scope.row.quantity"
+                class="edit-input"
+                size="mini"
+                type="number"
+                min="0"
+                @mousewheel.native.prevent 
+                @input="editQuantity(scope.row)"
+              />
+              <span v-else >{{ scope.row.quantity }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="缺货" width="100px" align="center">
+        <el-table-column label="缺货" width="100px" align="center" prop="lack_quantity">
           <template slot-scope="scope">
             <el-input 
+              v-if="dialogStatus === 'create' && scope.row.leaf"
               v-model="scope.row.lack_quantity"
               class="edit-input"
-              size="small"
+              type="number"
+              size="mini"
+              min="0"
+              @input="sumary"
             />
+            <span v-else >{{ scope.row.lack_quantity }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
-          <template slot="header">
-            <addProduct ref="addProduct" @insertProduct="insertProduct"></addProduct>
-          </template>
-          <template slot-scope="scope">
+        <el-table-column v-if="dialogStatus === 'create'" label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
+          <template slot-scope="scope" v-if="!scope.row.leaf">
             <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end">
               <el-button icon="el-icon-delete" size="mini" type="danger" @click="delRow(scope.$index)">
               </el-button>
@@ -124,46 +152,52 @@
 
 <script>
 import { addStockOut, getStockOutDetail } from '@/api/stockout'
-import addProduct from '@/components/addProduct'
-import shopSelect from '@/components/shopSelect'
-import expressSelect from '@/components/expressSelect'
-import productPopover from '@/components/productPopover';
+import { getOrderDetail } from '@/api/order'
+import { getExportProducts } from '@/api/product'
+import buyerSelect from '@/components/buyerSelect'
+import productBtnGroup from '@/components/productBtnGroup';
+import productPopover from '@/components/productPopover'
 
 export default {
   name: 'modifyStockOut',
-  components: { addProduct, shopSelect, expressSelect, productPopover },
+  components: { buyerSelect, productBtnGroup, productPopover },
   props: {
     row: {
       type: Object,
       required: true
     }
   },
+  computed: {
+    sizeSort() {
+      return this.$store.state.const.sizeSort
+    }
+  },
   data() {
     return {
       textMap: {
         update: '编辑出库单',
-        create: '添加出库单'
+        create: '添加出库单',
+        view: '查看出库单'
       },
       dialogShow: false,
       dialogStatus: '',
       btnLoding: false,
+      sumPrice: 0,
+      sumQuantity: 0,
+      lackQuantity: 0,
+      diff: '',
+      priceCls: '',
       temp: {},
       defaultTemp: {
         id: undefined,
-        shop: '',
-        type: '1',
-        shipping: '',
+        order_id: '',
+        buyer_login_id: '',
+        shipping_fee: '',
         remark: '',
-        express: '',
-        express_no: '',
+        shipping_no: '',
         goods: []
       },
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写店铺名称' }
-        ]
-      },
-      tagTypeArr: ['info', 'warning', '', 'success',  'danger']
+      rules: {}
     }
   },
   watch: {
@@ -176,9 +210,14 @@ export default {
     showDialog(status) {
       this.dialogStatus = status
       this.dialogShow = true
+      this.priceCls = this.dialogStatus === 'create' ? 'price-cls' : 'price-label-cls'
       this.$nextTick(() => {
         if (status === 'create') {
-          this.resetForm('dialogForm')
+          if (typeof(this.row.api_type) !== 'undefined' && this.row.api_type === 'order') {
+            this.getOrderDetail(this.row.order_id)
+          } else {
+            this.resetForm('dialogForm')
+          }
         } else {
           this.getDetail(this.row.id)
         }
@@ -194,12 +233,7 @@ export default {
       if (this.$refs[formName] !== undefined) {
         this.$refs[formName].resetFields()
       }
-      if (this.$refs.selectShopRef !== undefined) {
-        this.$refs.selectShopRef.setValue('')
-      }
-      if (this.$refs.selectExpressRef !== undefined) {
-        this.$refs.selectExpressRef.setValue('')
-      }
+      this.$refs.buyerSelectRef.setValue(0)
     },
     handleFilter() {
       this.$emit('handleFilter')
@@ -222,11 +256,12 @@ export default {
     getDetail(id) {
       getStockOutDetail({id: id}).then(res => {
         this.temp = res.response
+        this.priceCls = 'price-cls'
         this.$store.dispatch('addproduct/setSelected', this.temp.goods)
         this.$nextTick(() => {
-          this.$refs.selectShopRef.setValue(this.temp.shop)
-          this.$refs.selectExpressRef.setValue(this.temp.express)
+          this.$refs.buyerSelectRef.setValue(this.temp.buyer_login_id)
         })
+        this.sumary()
       }).catch(() => {})
     },
     updateData() {
@@ -244,38 +279,176 @@ export default {
         }
       })
     },
-    indexMethod(index) {
-      return index + 1
-    },
-    insertProduct(selected) {
+    insertProduct(selected, type) {
+      type = type || 'select'
       if (selected.length > 0) {
-        selected.forEach( item => {
-          const temp = {
-            product_sku_id: item.id,
-            product_id: item.product_id,
-            subject: item.subject,
-            cargo_number: item.cargo_number,
-            image: item.image,
-            attr_arr: item['attr_arr'],
-            price: 0,
-            quantity: 0,
-            lack_quantity: 0
-          }
-          this.temp.goods.push(temp)
-        })
-        this.$store.dispatch('addproduct/setSelected', this.temp.goods)
+        if (type === 'select') {
+          selected.forEach(sel => {
+            sel.lack_quantity = ''
+            this.pushProduct(sel)
+          })
+          this.sumary()
+          this.$store.dispatch('addproduct/setSelected', this.temp.goods)
+        }else {
+          getExportProducts({ data: selected, ext: ['单价', '数量'] }).then(res => {
+            if (res.response.length > 0) {
+              res.response.forEach(resp => {
+                this.pushProduct(resp)
+              })
+            }
+            this.$nextTick(() => {
+              this.sumary()
+            })
+          })
+        }
       }
     },
     delRow(index) {
       this.temp.goods.splice(index, 1)
       this.$store.dispatch('addproduct/setSelected', this.temp.goods)
     },
-    selectShop(shopId) {
-      this.temp.shop = shopId
+    sumary() {
+      this.sumQuantity = 0
+      this.sumPrice = 0
+      this.lackQuantity = 0
+      if (this.temp.goods.length > 0) {
+        this.temp.goods.forEach(item => {
+          if (typeof(item.children) !== 'undefined' && item.children.length > 0) {
+            const price = parseFloat(item.price) || 0
+            item.quantity = 0
+            item.lack_quantity = 0
+            item.order_quantity = 0
+            item.children.forEach(child => {
+              const childQuantity = parseInt(child.quantity) || 0
+              const childLackQuantity = parseInt(child.lack_quantity) || 0
+              const childOrderQuantity = parseInt(child.order_quantity) || 0
+              item.quantity += childQuantity
+              this.sumQuantity += childQuantity
+              this.lackQuantity += childLackQuantity
+              item.lack_quantity += childLackQuantity
+              this.sumPrice += price * childQuantity
+              item.order_quantity += childOrderQuantity
+            })
+            //排序
+            item.children = this.setSizeSort(item.children)
+          }
+        })
+      }
     },
-    selectExpress(id) {
-      this.temp.express = id
+    getSummaries({ columns, data }) {
+      return columns.map(c => {
+        let res = ''
+        switch(c.property) {
+          case "cargo_number":
+            res = '合计'
+            break
+          case "price":
+            res = this.sumPrice
+            break
+          case "quantity":
+            res = this.sumQuantity
+            break
+          case "lack_quantity":
+            res = this.lackQuantity
+            break
+        }
+        return res
+      })
+    },
+    selectBuyer(value) {
+      this.temp.buyer_login_id = value
+    },
+    multPrice() {
+      if (this.dialogStatus === 'create' &&  Math.abs(this.diff) > 0 && this.temp.goods.length > 0) {
+        this.temp.goods.forEach(good => {
+          good.price = parseFloat(good.price) + parseFloat(this.diff)
+        })
+        this.sumary()
+      }
+    },
+    editQuantity(row) {
+      const stock = row.stock * 1
+      if (row.quantity > stock) {
+        this.$message({ message: '库存不足', type: 'warning', showClose: true })
+        row.lack_quantity = row.quantity - stock
+        row.quantity = stock
+      }
+      this.sumary()
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (typeof(row.leaf) === 'undefined' || !row.leaf) {
+        return '';
+      }
+      return 'success-row';
+    },
+    getOrderDetail(orderId) {
+      const params = {
+        id: orderId,
+        api_type: 'stockout'
+      }
+      getOrderDetail(params).then(res => {
+        this.temp = res.response
+        this.$store.dispatch('addproduct/setSelected', this.temp.goods)
+        this.$nextTick(() => {
+          this.$refs.buyerSelectRef.setValue(this.temp.buyer_login_id)
+        })
+        this.sumary()
+      }).catch(() => {})
+    },
+    pushProduct(product) {
+      let shouldPush = true
+      this.temp.goods.forEach(good => {
+        if (good.cargo_number === product.cargo_number) {
+          shouldPush = false
+          product.children.forEach(child => {
+            let childExist = false
+            good.children.forEach(gc => {
+              if (child.size === gc.size) {
+                childExist = true
+              }
+            })
+            if (!childExist) {
+              good.children.push(child)
+            }
+          })
+        }
+      })
+      if (shouldPush) {
+        this.temp.goods.push(product)
+      }
+    },
+    setSizeSort(children) {
+      let result = []
+      this.sizeSort.forEach(size => {
+        children.forEach(c => {
+          if (c.size === size) {
+            result.push(c)
+          }
+        })
+      })
+      return result
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.price-cls {
+  display: flex;
+}
+.price-cls span {
+  width: 60%;
+  margin: 2px 3px 0 0;
+}
+.price-cls .price-div {
+  width: 60%;
+}
+.price-cls div {
+  margin-left: 3px;
+}
+.price-label-cls {
+  display: block;
+}
+/deep/.el-table .success-row {
+  background: #f0f9eb;
+}
+</style>

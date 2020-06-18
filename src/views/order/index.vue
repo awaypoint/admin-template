@@ -10,13 +10,31 @@
         </el-button>
       </div>
       <el-input v-model="listQuery.order_id" placeholder="请输入订单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.shipping_no" placeholder="请输入快递单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.status" style="width: 160px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
         <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
       <el-select v-model="listQuery.type" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="类型" clearable>
         <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
-      <el-input v-model="listQuery.buyer_login_id" placeholder="请输入买家" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.to_full_name" placeholder="请输入买家" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.is_printed" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="是否打印" clearable>
+        <el-option v-for="item in boolOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
+      <el-select v-model="listQuery.is_stock" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="是否出库" clearable>
+        <el-option v-for="item in boolOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
+      <el-date-picker class="filter-item"
+        v-model="listQuery.times"
+        type="datetimerange"
+        :picker-options="pickerOptions"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        align="right"
+        @change="handleFilter"
+      >
+      </el-date-picker>
     </div>
 
     <el-table
@@ -33,10 +51,11 @@
       @sort-change="sortChange"
     >
       <el-table-column type="selection" width="50px" align="center"></el-table-column>
-      <el-table-column label="订单号" min-width="150px" align="center">
+      <el-table-column label="订单号" min-width="180px">
         <template slot-scope="scope">
           <el-tag :type="scope.row.type == 2 ? 'info' : 'success'">{{ typeMap[scope.row.type] }}</el-tag>
           <span>{{ scope.row.order_id }}</span>
+          <el-tag v-if="scope.row.is_printed === '1'" type='info'>印</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="产品数量" min-width="80px" align="center" prop="product_num">
@@ -77,7 +96,8 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter"></modifyOrderDialog>
+    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter" @handleStock="handleStock"></modifyOrderDialog>
+    <modifyStockDialog ref="modifyStockOutDialogRef" :row="stockoutRow" @handleFilter="handleFilter"></modifyStockDialog>
   </div>
 </template>
 
@@ -87,10 +107,11 @@ import { getOrderList, brushOrder } from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
 import modifyOrderDialog from './components/modify';
+import modifyStockDialog from '../stockout/components/modify';
 
 export default {
   name: 'Order',
-  components: { Pagination, modifyOrderDialog },
+  components: { Pagination, modifyOrderDialog, modifyStockDialog },
   data() {
     return {
       tableKey: 0,
@@ -102,12 +123,18 @@ export default {
         page: 1,
         page_size: 10,
         order_id: undefined,
+        shipping_no: undefined,
         status: undefined,
+        to_full_name: '',
         buyer_login_id: '',
         order_by: undefined,
-        sort_by: undefined
+        sort_by: undefined,
+        is_printed: undefined,
+        is_stock: undefined,
+        times: undefined
       },
-      orderRow: {}
+      orderRow: {},
+      stockoutRow: {}
     }
   },
   computed: {
@@ -128,6 +155,12 @@ export default {
     },
     statusMap() {
       return this.$store.state.order.orderStatusMap
+    },
+    boolOptions() {
+      return this.$store.state.const.boolOptions
+    },
+    pickerOptions() {
+      return this.$store.state.const.pickerOptions
     }
   },
   created() {
@@ -189,6 +222,13 @@ export default {
         this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
         this.handleFilter()
       }).catch(() => {})
+    },
+    handleStock(orderId) {
+      this.stockoutRow.order_id = orderId
+      this.stockoutRow.api_type = 'order'
+      setTimeout(() => {
+        this.$refs.modifyStockOutDialogRef.showDialog('create')
+      }, 0.5 * 1000);
     }
   }
 }

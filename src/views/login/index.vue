@@ -83,10 +83,10 @@ export default {
       }
     }
     return {
-      title: '巨嗨',
+      title: '1688管理系统',
       loginForm: {
-        username: 'away1',
-        password: '123456'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [

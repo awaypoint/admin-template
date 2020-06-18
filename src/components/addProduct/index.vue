@@ -1,83 +1,79 @@
 <template>
-  <div>
-    <el-tooltip class="item" effect="dark" content="添加商品" placement="bottom-end">
-      <el-popover
-        placement="right"
-        width="600"
-        trigger="manual"
-        v-model="visible"
-      >
-        <div>
-          <div class="filter-container">
-            <div class="filter-container-point" @click="close">
-              <i class="el-icon-close filter-container-close" />
-            </div>
-            <el-input
-              placeholder="请输入产品名称/货号"
-              v-model="listQuery.query"
-              style="width: 200px;"
-              size="mini"
-              @keyup.enter.native="handleFilter"
-            >
-              <i slot="prefix" class="el-input__icon el-icon-search"></i>
-            </el-input>
-          </div>
-          <el-table 
-            ref="addProductTableRef"
-            v-loading="listLoading"
-            :data="gridData"
-            width="100%"
-            @selection-change="handleSelect"
-          >
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column width="250" property="address" label="产品名称" show-overflow-tooltip>
-              <template slot-scope="scope">
-                <span>{{ scope.row.subject }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column width="100" label="货号">
-              <template slot-scope="scope">
-                <span>{{ scope.row.cargo_number }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column min-width="160" property="name" label="sku">
-              <template slot-scope="scope">
-                <el-tag 
-                  v-for="(attr, index) in scope.row.attr_arr"
-                  :key="index"
-                  effect="dark"
-                  :type="tagTypeArr[index % 5]"
-                  style="margin-right: 5px;"
-                >
-                {{ attr }}
-                </el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-          <pagination
-            v-show="total>0"
-            :total="total"
-            :page.sync="listQuery.page"
-            :limit.sync="listQuery.page_size"
-            layout="total, prev, pager, next"
-            @pagination="getList"
-          />
-          <div class="add-product-insert-btn">
-            <el-button size="mini" type="primary" @click="choose">选好了</el-button> 
-          </div>
+  <el-popover
+    placement="right"
+    width="600"
+    trigger="manual"
+    v-model="visible"
+    popper-class="popper-class-name"
+  >
+    <div>
+      <div class="filter-container">
+        <div class="filter-container-point" @click="close">
+          <i class="el-icon-close filter-container-close" />
         </div>
-        <el-button slot="reference" circle size="mini" :icon="btnIcon" @click="click" class="add-product-btn-cls"></el-button>
-      </el-popover>
-    </el-tooltip>
-  </div>
+        <el-input
+          placeholder="请输入产品名称/货号"
+          v-model="listQuery.query"
+          style="width: 200px;"
+          size="mini"
+          @keyup.enter.native="handleFilter"
+        >
+          <i slot="prefix" class="el-input__icon el-icon-search"></i>
+        </el-input>
+      </div>
+      <el-table 
+        ref="addProductTableRef"
+        v-loading="listLoading"
+        :data="gridData"
+        width="100%"
+        max-height="500px"
+        @selection-change="handleSelect"
+      >
+        <el-table-column
+          type="selection"
+          width="55">
+        </el-table-column>
+        <el-table-column label="图片" width="100px">
+          <template  slot-scope="scope">
+            <img :src="scope.row.image" style="height:64px;width:64px;">
+          </template>
+        </el-table-column>
+        <el-table-column min-width="250" property="address" label="产品名称" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <span>{{ scope.row.subject }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="100" label="货号">
+          <template slot-scope="scope">
+            <span>{{ scope.row.cargo_number }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <pagination
+        v-show="total>0"
+        :total="total"
+        :page.sync="listQuery.page"
+        :limit.sync="listQuery.page_size"
+        layout="total, prev, pager, next"
+        @pagination="getList"
+      />
+      <div class="add-product-insert-btn">
+        <el-button size="mini" type="primary" @click="choose">选好了</el-button> 
+      </div>
+    </div>
+    <el-button type="primary" slot="reference" size="small" :icon="btnIcon" @click="click" class="add-product-btn-cls">添加产品</el-button>
+  </el-popover>
 </template>
 
 <script>
 import { getSkuProducts } from '@/api/product'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+
+const pageSize = 8
+let mockGridData = []
+for(let i = 0; i < pageSize; i++) {
+  mockGridData.push({ id: 'mock' + i })
+}
 
 export default {
   name: 'addProduct',
@@ -90,12 +86,12 @@ export default {
       total: 0,
       listQuery: {
         page: 1,
-        page_size: 8,
+        page_size: pageSize,
         query: undefined
       },
       multipleSelection: [],
       pageSelection: [],
-      gridData: [],
+      gridData: mockGridData,
       tagTypeArr: ['info', 'warning', '', 'success',  'danger']
     }
   },
@@ -176,9 +172,6 @@ export default {
   margin-top: 10px;
   text-align: left;
 }
-.add-product-btn-cls {
-  font-size: 17px;
-}
 .filter-container {
   margin-bottom: 10px;
   text-align: right;
@@ -214,5 +207,8 @@ export default {
 
 /deep/.el-table .success-row {
   background: #f0f9eb;
+}
+.popper-class-name {
+  height: 500px;
 }
 </style>

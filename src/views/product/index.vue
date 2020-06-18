@@ -36,7 +36,7 @@
     >
       <el-table-column label="产品名称" min-width="250px" align="left">
         <template slot-scope="scope">
-          <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
+          <productPopover :data="scope.row" :reference="scope.row.subject" @click="handleUpdate"></productPopover>
         </template>
       </el-table-column>
       <el-table-column label="货号" min-width="160px" align="center" prop="product_cargo_number">
@@ -75,9 +75,9 @@ import { mapGetters } from 'vuex'
 import { getProductList, delProduct } from '@/api/product'
 import Pagination from '@/components/Pagination'
 import { checkPermission } from '@/utils/index'
-import modifyProductDialog from './components/modify';
-import viewProductDialog from './components/view';
-import productPopover from '@/components/productPopover';
+import modifyProductDialog from './components/modify'
+import viewProductDialog from './components/view'
+import productPopover from '@/components/productPopover'
 
 export default {
   name: 'Product',
@@ -94,7 +94,8 @@ export default {
         subject: undefined,
         product_cargo_number: undefined,
         order_by: undefined,
-        sort_by: undefined
+        sort_by: undefined,
+        times: undefined
       },
       productRow: {}
     }

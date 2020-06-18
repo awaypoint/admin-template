@@ -49,6 +49,7 @@ const state = {
     { value: false, label: 'XXL' },
     { value: false, label: 'XXXL' }
   ],
+  sizeSort: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
   sizeTableOptions: [
     { value: true, label: '胸围' },
     { value: true, label: '腰围' },
@@ -57,6 +58,14 @@ const state = {
     { value: true, label: '上衣长' },
     { value: true, label: '裤长' }
   ],
+  sizeTableEnMap: {
+    '胸围': 'Bust',
+    '腰围': 'Waist',
+    '臀围': 'Hip',
+    '袖长': 'Sleeve',
+    '上衣长': 'Top',
+    '裤长': 'Pants',
+  },
   //common
   query: {},
   boolOptions: [

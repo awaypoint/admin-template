@@ -31,3 +31,11 @@ export function getPrinterOrders(data) {
     data
   })
 }
+
+export function multStockOut(data) {
+  return request({
+    url: 'multStockOut',
+    method: 'post',
+    data
+  })
+}

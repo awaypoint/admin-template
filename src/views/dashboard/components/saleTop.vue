@@ -3,7 +3,7 @@
     <div slot="header" class="clearfix">
       <span>销量排行</span>
       <div class="date-option">
-        <el-select v-model="value" placeholder="请选择" clearable size="mini">
+        <el-select v-model="listQuery.type" placeholder="请选择" clearable size="mini" @change="fetchData">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -13,15 +13,15 @@
         </el-select>
       </div>
     </div>
-    <el-table :data="list">
-      <el-table-column label="产品名称" min-width="200" align="center">
+    <el-table :data="list" v-loading="loading" max-height="500">
+      <el-table-column label="产品名称" min-width="200" align="left" show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.row.order_no | orderNoFilter }}
+          <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
         </template>
       </el-table-column>
       <el-table-column label="数量" width="195" align="center">
         <template slot-scope="scope">
-          ¥{{ scope.row.price | toThousandFilter }}
+          {{ scope.row.quantity }}
         </template>
       </el-table-column>
     </el-table>
@@ -29,25 +29,19 @@
 </template>
 
 <script>
+import { bestSale } from '@/api/report'
+import productPopover from '@/components/productPopover'
 
 export default {
   name: 'saleTop',
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        success: 'success',
-        pending: 'danger'
-      }
-      return statusMap[status]
-    },
-    orderNoFilter(str) {
-      return str.substring(0, 30)
-    }
-  },
+  components: { productPopover },
   data() {
     return {
+      loading: false,
       list: null,
-      value: '1',
+      listQuery: {
+        type: '1'
+      },
       options: [
         {
           label: '全部',
@@ -69,7 +63,15 @@ export default {
   },
   methods: {
     fetchData() {
-      this.list = []
+      this.loading = true
+      bestSale(this.listQuery).then(res => {
+        this.list = res.response
+        setTimeout(() => {
+          this.loading = false
+        }, 0.5 * 1000);
+      }).catch(() => {
+        this.loading = false
+      })
     }
   }
 }

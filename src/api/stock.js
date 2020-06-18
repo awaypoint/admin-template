@@ -8,25 +8,9 @@ export function getStockList(data) {
   })
 }
 
-export function addStockIn(data) {
+export function getStockItems(data) {
   return request({
-    url: 'addStockIn',
-    method: 'post',
-    data
-  })
-}
-
-export function updateStockIn(data) {
-  return request({
-    url: 'updateFactory',
-    method: 'post',
-    data
-  })
-}
-
-export function delStockIn(data) {
-  return request({
-    url: 'delFactroy',
+    url: 'getStockItems',
     method: 'post',
     data
   })

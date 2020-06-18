@@ -6,27 +6,49 @@
           查询
         </el-button>
       </div>
-      <el-input v-model="listQuery.name" placeholder="请输入厂家名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.subject" placeholder="请输入产品名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.cargo_number" placeholder="请输入产品货号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <factorySelect ref="factorySelectRef" :styleStr="selectFactoryStyle" width="150" @selectFactory="selectFactory"></factorySelect>
     </div>
 
     <el-table
       row-key="id"
+      ref="listTable"
       v-loading="listLoading"
       :data="list"
       fit
       style="width: 100%;"
-      default-expand-all
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      lazy
+      :load="load"
+      :tree-props="{ hasChildren: 'hasChildren' }"
       :row-class-name="tableRowClassName"
+      show-summary
+      :summary-method="getSummaries"
       @sort-change="sortChange"
+      @row-click="handleClick"
     >
-      <el-table-column label="产品名称" min-width="200px" align="center" prop="subject">
-      </el-table-column>
-      <el-table-column label="货号" min-width="160px" align="center" prop="cargo_number">
+      <el-table-column label="产品名称" min-width="200px" align="left" prop="subject" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
+        </template>
       </el-table-column>
       <el-table-column label="价格" width="150px" align="center" prop="price">
+        <template slot-scope="scope">
+          <span v-if="!scope.row.leaf">
+            <el-tag effect="dark" type="success">{{ scope.row.consign_price }}</el-tag>
+            <el-tag effect="dark" type="danger">{{ scope.row.platform_price }}</el-tag>
+          </span>
+        </template>
       </el-table-column>
-      <el-table-column label="库存" width="150px" align="center" prop="quantity">
+      <el-table-column label="货号/尺码" min-width="100px" align="center" prop="cargo_number" sortable>
+      </el-table-column>
+      <el-table-column label="库存" width="80px" align="center" prop="quantity">
+      </el-table-column>
+      <el-table-column label="销量" width="80px" align="center" prop="sale">
+      </el-table-column>
+      <el-table-column label="缺货" width="80px" align="center" prop="quantity">
+      </el-table-column>
+      <el-table-column label="未发货" width="80px" align="center" prop="waitsend_quantity">
       </el-table-column>
       <!-- <el-table-column label="创建时间" width="160px" align="center" sortable prop="created_at">
         <template slot-scope="scope">
@@ -34,14 +56,16 @@
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column> -->
-      <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end" v-show="checkPermission('updateStock')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
+      <el-table-column label="操作" align="center" min-width="100" prop="operate">
+        <template scope="scope">
+          <div v-if="typeof(scope.row.leaf) === 'undefined' || !scope.row.leaf">
+            <el-button size="mini" icon="el-icon-view" @click="handleUpdate(scope.row)">查看</el-button>
+            <el-button size="mini" icon="el-icon-s-data" type="primary">销售数据</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
+    <modifyProductDialog ref="modifyProductDialog" :row="productRow" @handleFilter="handleFilter"></modifyProductDialog>
 
     <pagination
       v-show="total>0"
@@ -55,27 +79,36 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { getStockList } from '@/api/stock'
+import { getStockList, getStockItems } from '@/api/stock'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
+import productPopover from '@/components/productPopover'
+import factorySelect from '@/components/factorySelect'
+import modifyProductDialog from '../product/components/modify'
 
 export default {
   name: 'Stock',
-  components: { Pagination },
+  components: { Pagination, factorySelect, productPopover, modifyProductDialog },
   data() {
     return {
+      selectFactoryStyle: 'display: inline-block;vertical-align: middle;margin-bottom: 10px;width:150px;',
       tableKey: 0,
+      expands: [],
       list: [],
       total: 0,
+      quantity: 0,
+      amount: 0.00,
       listLoading: false,
       listQuery: {
         page: 1,
         page_size: 10,
-        name: undefined,
-        status: undefined,
+        subject: undefined,
+        cargo_number: undefined,
+        factory: undefined,
         order_by: undefined,
         sort_by: undefined
-      }
+      },
+      productRow: {}
     }
   },
   computed: {
@@ -95,29 +128,24 @@ export default {
       this.getList()
     },
     handleUpdate(row) {
-      this.dialogStatus = 'update'
-      for(let field in this.temp) {
-        this.temp[field] = row[field]
-      }
-      this.dialogFormVisible = true
+      this.productRow.id = row.p_id
+      this.$refs.modifyProductDialog.showDialog('update')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
       this.listQuery.sort_by = column.order === "descending" ? 'DESC' : 'ASC'
       this.handleFilter()
     },
-    handleModifyState(row) {
-      const upData = {
-        'id': row.id,
-        'status': row.status
-      }
-      this.modifyFactory(upData, false)
-    },
     getList() {
       this.listLoading = true
       getStockList(this.listQuery).then(res => {
         this.list = res.response.rows
         this.total = res.response.total
+        this.quantity = res.response.quantity
+        this.amount = res.response.amount
+        this.list.map(l => {
+          this.$refs.listTable.toggleRowExpansion(l, false)
+        })
         setTimeout(() => {
           this.listLoading = false
         }, 0.5 * 1000)
@@ -126,12 +154,37 @@ export default {
       })
     },
     tableRowClassName({ row, rowIndex }) {
-      if (row.level === 1) {
-        return 'warning-row';
-      } else if (row.level === 2) {
-        return 'success-row';
+      if (typeof(row.leaf) === 'undefined' || !row.leaf) {
+        return '';
       }
-      return '';
+      return 'success-row';
+    },
+    load(row, treeNode, resolve) {
+      const params = {
+        product_id: row.product_id,
+        cargo_number: row.cargo_number
+      }
+      getStockItems(params).then( res => {
+        setTimeout(() => {
+          resolve(res.response)
+        }, 0.3 * 1000);
+      })
+    },
+    handleClick(row, index, e) {
+      if (index.property !== 'operate') {
+        const expanded = this.$refs.listTable.store.states.treeData[row.id].expanded || false
+        if (!expanded) {
+          this.$refs.listTable.store.states.treeData[row.id].loaded = false
+        }
+        this.$refs.listTable.store.loadOrToggle(row)
+      }
+    },
+    selectFactory(value) {
+      this.listQuery.factory = value
+      this.handleFilter()
+    },
+    getSummaries() {
+      return ['合计', '库存金额:' + this.amount, '库存数量:' + this.quantity]
     }
   }
 }

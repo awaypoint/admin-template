@@ -1,16 +1,11 @@
 <template>
   <el-select v-model="value" placeholder="请选择" clearable filterable @change="change">
-    <el-option-group
-      v-for="group in options"
-      :key="group.label"
-      :label="group.label">
-      <el-option
-        v-for="item in group.items"
-        :key="item.id"
-        :label="item.name"
-        :value="item.id">
-      </el-option>
-    </el-option-group>
+    <el-option
+      v-for="item in options"
+      :key="item.id"
+      :label="item.name"
+      :value="item.id">
+    </el-option>
   </el-select>
 </template>
 

@@ -31,8 +31,18 @@
                 </el-form-item>
               </el-col>
               <el-col :span="12">
+                <el-form-item label="门店" prop="shop">
+                  <shopSelect ref="selectShopRef" @selectShop="selectShop"></shopSelect>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
                 <el-form-item label="产品售价" prop="consign_price">
                   <el-input v-model="temp.consign_price"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="平台价" prop="platform_price">
+                  <el-input v-model="temp.platform_price" readonly></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -212,6 +222,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
+        <el-button size="small" @click="printSize" v-if="dialogStatus !== 'create'">打印尺码表</el-button>
         <el-button
           type="primary"
           size="small"
@@ -228,10 +239,11 @@ import { mapGetters } from 'vuex'
 import { deepClone } from '@/utils'
 import { addProduct, getProductDetail, updateProduct } from '@/api/product'
 import factorySelect from '@/components/factorySelect';
+import shopSelect from '@/components/shopSelect'
 
 export default {
   name: 'modifyProduct',
-  components: { factorySelect },
+  components: { factorySelect, shopSelect },
   props: {
     row: {
       type: Object,
@@ -250,7 +262,9 @@ export default {
       temp: {
         subject: '',
         product_cargo_number: '',
+        shop: '',
         consign_price: '',
+        platform_price: '',
         stock: '',
         factory: '',
         colors: [],
@@ -350,13 +364,8 @@ export default {
         }
       })
     },
-    getSummaries(params) {
-      const { columns, data } = params
-      const sums = [ '总计', 333, 222 ]
-      return sums
-    },
     dropzoneS(response, file, fielList) {
-      if (response.response.code > 0) {
+      if (response.code > 0) {
         this.$message({ message: '图片上传失败', type: 'error', showClose: true })
         return
       }
@@ -399,6 +408,7 @@ export default {
     getDetail() {
       getProductDetail({ id: this.row.id }).then( res => {
         this.temp = res.response
+        this.$refs.selectShopRef.setValue(this.temp.shop)
         this.$refs.factorySelectRef.setValue(this.temp.factory)
         this.temp.colors = this.getDefaultData(this.defaultColors, res.response.colors)
         this.temp.size = this.getDefaultData(this.defaultSize, res.response.size)
@@ -444,6 +454,13 @@ export default {
           })
         }
       })
+    },
+    selectShop(shopId) {
+      this.temp.shop = shopId
+    },
+    printSize() {
+      const routeData = this.$router.resolve({ path: '/size?id=' + this.row.id });
+      window.open(routeData.href, '_blank');
     }
   }
 }

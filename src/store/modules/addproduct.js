@@ -13,7 +13,7 @@ const mutations = {
 const actions = {
   setSelected({ commit }, data) {
     let selectedIds = data.map(row => {
-      return row.product_sku_id
+      return row.id
     })
     commit('CHANGE_ATTR', { key: 'selected', value: selectedIds })
   }

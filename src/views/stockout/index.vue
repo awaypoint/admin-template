@@ -22,34 +22,27 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="出库单号" min-width="200px" align="center" prop="item_no">
+      <el-table-column label="出库单号" width="200px" align="center" prop="item_no">
       </el-table-column>
-      <el-table-column label="出库数量" min-width="160px" align="center" prop="quantity">
+      <el-table-column label="出库数量" min-width="120px" align="center" prop="quantity">
       </el-table-column>
-      <el-table-column label="出库金额" min-width="160px" align="center" prop="amount">
+      <el-table-column label="出库金额" min-width="120px" align="center" prop="amount">
       </el-table-column>
-      <el-table-column label="运费" min-width="160px" align="center" prop="shipping">
+      <el-table-column label="运费" min-width="120px" align="center" prop="shipping_fee">
       </el-table-column>
-      <el-table-column label="状态" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.status }}</span>
-        </template>
+      <el-table-column label="缺货" min-width="120px" align="center" prop="lack_quantity">
       </el-table-column>
-      <el-table-column label="入库时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="出库时间" width="160px" align="center" sortable prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" min-width="130px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-tooltip class="item" effect="dark" content="查看" placement="bottom-end" v-show="checkPermission('updateStockOut')">
-            <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)"></el-button>
-          </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end" v-show="checkPermission('delStockOut')">
-            <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-            </el-button>
-          </el-tooltip>
+          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('updateStockOut')" @click="handleUpdate(scope.row)">查看</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('delStockOut')" @click="handleDelete(scope.row.id)">撤销
+          </el-button>
         </template>
       </el-table-column>
     </el-table>

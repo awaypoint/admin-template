@@ -150,31 +150,11 @@
         </el-table-column>
         <el-table-column label="折扣" width="100px" align="center" prop="discount">
         </el-table-column>
-        <!-- <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
-          <template slot="header">
-            <addProduct ref="addProduct"></addProduct>
-          </template>
-          <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" content="编辑" placement="bottom-end">
-              <el-button 
-                size="mini"
-                :type="scope.row.editable ? 'success' : ''"
-                :icon="scope.row.editable ? 'el-icon-finished' : 'el-icon-edit'"
-                @click="handleEditRow(scope.row)"
-              >
-              </el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="打印订单" placement="bottom-end" v-show="checkPermission('printOrder')">
-              <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">
-              </el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column> -->
       </el-table>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
-        <el-button type="primary" size="small" :loading="btnLoding" @click="closeDialog">确认</el-button>
-        <el-button type="primary" size="small" @click="handlePrinte">打印</el-button>
+        <el-button type="success" size="small" @click="handlePrinte">打印</el-button>
+        <el-button v-if="temp.is_stock === '2'" type="primary" size="small" @click="handleStock">出库</el-button>
       </div>
     </el-dialog>
   </div>
@@ -216,6 +196,7 @@ export default {
         name: '',
         status: '1',
         desc: '',
+        is_stock: '2',
         products: []
       },
       rules: {
@@ -286,6 +267,10 @@ export default {
       const routeData = this.$router.resolve({ path: '/printe' });
       window.open(routeData.href, '_blank');
     },
+    handleStock() {
+      this.closeDialog()
+      this.$emit('handleStock', this.temp.order_id)
+    }
   }
 }
 </script>

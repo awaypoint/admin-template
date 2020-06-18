@@ -3,35 +3,25 @@
     <div slot="header" class="clearfix">
       <span>今日新买家</span>
     </div>
-    <el-table :data="list">
-      <el-table-column label="买家id" min-width="200" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.order_no | orderNoFilter }}
-        </template>
+    <el-table :data="list" v-loading="listLoading" max-height="500">
+      <el-table-column label="买家id" min-width="200" align="center" prop="buyer_login_id">
       </el-table-column>
     </el-table>
   </el-card>
 </template>
 
 <script>
+import { getTodayBuyers } from '@/api/report'
 
 export default {
-  name: 'saleTop',
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        success: 'success',
-        pending: 'danger'
-      }
-      return statusMap[status]
-    },
-    orderNoFilter(str) {
-      return str.substring(0, 30)
-    }
-  },
+  name: 'newBuyers',
   data() {
     return {
-      list: null
+      list: [],
+      listLoading: false,
+      listQuery: {
+
+      }
     }
   },
   created() {
@@ -39,7 +29,15 @@ export default {
   },
   methods: {
     fetchData() {
-      this.list = []
+      this.listLoading = true
+      getTodayBuyers(this.listQuery).then(res => {
+        this.list = res.response
+        setTimeout(() => {
+          this.listLoading = false
+        }, 0.5 * 1000);
+      }).catch(() => {
+        this.listLoading = false
+      })
     }
   }
 }

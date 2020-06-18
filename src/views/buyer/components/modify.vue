@@ -29,6 +29,12 @@
           <el-radio v-model="temp.sex" label="2">女</el-radio>
           <el-radio v-model="temp.sex" label="3">未知</el-radio>
         </el-form-item>
+        <el-form-item label="QQ" prop="qq">
+          <el-input v-model="temp.qq"></el-input>
+        </el-form-item>
+        <el-form-item label="地址" prop="address">
+          <el-input v-model="temp.address" type="textarea"></el-input>
+        </el-form-item>
         <el-form-item label="描述" prop="desc">
           <el-input v-model="temp.desc" type="textarea"/>
         </el-form-item>

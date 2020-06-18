@@ -24,17 +24,9 @@ export function getStockInDetail(data) {
   })
 }
 
-export function updateStockIn(data) {
+export function cancelStockIn(data) {
   return request({
-    url: 'updateFactory',
-    method: 'post',
-    data
-  })
-}
-
-export function delStockIn(data) {
-  return request({
-    url: 'delFactroy',
+    url: 'cancelStockIn',
     method: 'post',
     data
   })

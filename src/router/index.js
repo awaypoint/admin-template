@@ -48,6 +48,16 @@ export const constantRoutes = [
     component: () => import('@/layout/views/orderPrinter'),
     hidden: true
   },
+  {
+    path: '/blog',
+    component: () => import('@/layout/views/blog'),
+    hidden: true
+  },
+  {
+    path: '/size',
+    component: () => import('@/layout/views/size'),
+    hidden: true
+  },
 
   {
     path: '/',
@@ -179,11 +189,11 @@ export const asyncRoutes = [
         meta: { title: '出库', icon: 'stockout' }
       },
       {
-        path: 'replenishment',
-        component: () => import('@/views/replenishment/index'),
-        name: 'replenishment',
-        route: 'Replenishment',
-        meta: { title: '补货列表', icon: 'replenishment' }
+        path: 'reissue',
+        component: () => import('@/views/stockout/index'),
+        name: 'reissue',
+        route: '',
+        meta: { title: '补发', icon: 'reissue' }
       }
     ]
   },
@@ -209,6 +219,24 @@ export const asyncRoutes = [
         name: 'roles',
         route: 'Roles',
         meta: { title: '角色管理', icon: 'role' }
+      }
+    ]
+  },
+
+  {
+    path: '/statistics',
+    component: Layout,
+    redirect: 'noRedirect',
+    name: 'statistics',
+    meta: { title: '统计分析', icon: 'statistics' },
+    children: [
+      
+      {
+        path: 'selling',
+        component: () => import('@/views/selling/index'),
+        name: 'selling',
+        // route: 'Selling',
+        meta: { title: '销售数据', icon: 'selling' }
       }
     ]
   },

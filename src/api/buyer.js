@@ -23,3 +23,11 @@ export function updateBuyer(data) {
     data
   })
 }
+
+export function getBuyerCombo(data) {
+  return request({
+    url: 'getBuyerCombo',
+    method: 'post',
+    data
+  })
+}

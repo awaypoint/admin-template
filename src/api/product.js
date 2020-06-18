@@ -47,3 +47,19 @@ export function getSkuProducts(data) {
     data
   })
 }
+
+export function getExportProducts(data) {
+  return request({
+    url: 'getExportProducts',
+    method: 'post',
+    data
+  })
+}
+
+export function getProductSize(data) {
+  return request({
+    url: 'getProductSize',
+    method: 'post',
+    data
+  })
+}

@@ -1,24 +1,25 @@
 <template>
-  <el-select v-model="value" placeholder="请选择厂家" clearable filterable @change="change" :style="styleStr || ''"
-  :disabled="disabled">
+  <el-select v-model="value" placeholder="请选择" clearable filterable :disabled="disabled" @change="change">
     <el-option
       v-for="item in options"
-      :key="item.id"
-      :label="item.name"
-      :value="item.id">
+      :key="item.buyer_member_id"
+      :label="item.buyer_login_id"
+      :value="item.buyer_member_id">
     </el-option>
   </el-select>
 </template>
 
 <script>
-import { getFactoryCombo } from '@/api/factory'
+import { getBuyerCombo } from '@/api/buyer'
 export default {
-  name: 'factorySelect',
+  name: 'buyerSelect',
   props: {
-    styleStr: {
-      type: String
+    type: {
+      type: Number,
+      default: 0
     },
     disabled: {
+      type: Boolean,
       default: false
     }
   },
@@ -33,15 +34,15 @@ export default {
   },
   methods: {
     getList() {
-      getFactoryCombo().then(res => {
+      getBuyerCombo({ type: this.type }).then(res => {
         this.options = res.response
       }).catch(() => {})
     },
     change(value) {
-      this.$emit('selectFactory', value)
+      this.$emit('selectBuyer', value)
     },
     setValue(value) {
-      if (value === '0') {
+      if (value == 0) {
         value = ''
       }
       this.value = value

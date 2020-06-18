@@ -3,7 +3,7 @@
     <el-backtop v-if="!printing"></el-backtop>
     <sticky :z-index="10" class-name="sub-navbar" v-if="!printing">
       <div class="printer-btns">
-        <el-button size="mini">标记为已打印</el-button>
+        <el-button size="mini" v-if="stockoutBtn" @click="multStockOut">一键出库</el-button>
         <el-button type="danger" size="mini" @click="print">打印全部</el-button>
       </div>
     </sticky>
@@ -132,7 +132,7 @@
 </template>
 
 <script>
-import { getPrinterOrders } from '@/api/order'
+import { getPrinterOrders, multStockOut } from '@/api/order'
 import Sticky from '@/components/Sticky'
 
 export default {
@@ -150,7 +150,8 @@ export default {
     return {
       printing: false,
       listLoading: false,
-      list: []
+      list: [],
+      stockoutBtn: true
     }
   },
   methods: {
@@ -170,6 +171,14 @@ export default {
       this.$nextTick(() => {
         window.print()
         this.printing = false
+      })
+    },
+    multStockOut() {
+      multStockOut({ 'orders': this.selectOrderIds }).then(res => {
+        this.$message({ message: '出库成功', type: 'success', showClose: true })
+        this.stockoutBtn = false
+      }).catch(() => {
+        this.$message({ message: '出库失败', type: 'success', showClose: true })
       })
     }
   }
