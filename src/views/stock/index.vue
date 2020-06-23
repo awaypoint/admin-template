@@ -29,7 +29,7 @@
     >
       <el-table-column label="产品名称" min-width="200px" align="left" prop="subject" :show-overflow-tooltip="true">
         <template slot-scope="scope">
-          <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
+          <productPopover :data="scope.row" :reference="scope.row.subject" @click="handleUpdate"></productPopover>
         </template>
       </el-table-column>
       <el-table-column label="价格" width="150px" align="center" prop="price">
@@ -59,7 +59,6 @@
       <el-table-column label="操作" align="center" min-width="100" prop="operate">
         <template scope="scope">
           <div v-if="typeof(scope.row.leaf) === 'undefined' || !scope.row.leaf">
-            <el-button size="mini" icon="el-icon-view" @click="handleUpdate(scope.row)">查看</el-button>
             <el-button size="mini" icon="el-icon-s-data" type="primary">销售数据</el-button>
           </div>
         </template>

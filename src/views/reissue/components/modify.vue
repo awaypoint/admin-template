@@ -18,36 +18,20 @@
       >
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="买家">
-              <buyerSelect ref="buyerSelectRef" :type="2" @selectBuyer="selectBuyer" :disabled="this.temp.order_id !== ''"></buyerSelect>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12" v-if="temp.order_id">
-            <el-form-item label="订单号">
-              <el-input v-model="temp.order_id" readonly/>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="10">
-          <el-col :span="12">
             <el-form-item label="运费">
-              <el-input v-model="temp.shipping_fee"/>
+              <el-input v-model="temp.shipping_fee" :readonly="readOnly"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="快递单号">
-              <el-input v-model="temp.shipping_no"/>
+              <el-input v-model="temp.shipping_no" :readonly="readOnly"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="temp.remark" type="textarea"/>
+          <el-input v-model="temp.remark" type="textarea" :readonly="readOnly"/>
         </el-form-item>
       </el-form>
-      <el-divider></el-divider>
-      <div v-if="dialogStatus === 'create'">
-        <productBtnGroup templateType="stockout" @insertProduct="insertProduct"></productBtnGroup>
-      </div>
       <el-table
         row-key="id"
         :data="temp.goods"
@@ -68,38 +52,11 @@
           </template>
         </el-table-column>
         <el-table-column label="出库价格" width="200px" align="center" prop="price">
-          <template slot="header" slot-scope="scope">
-            <div :class="priceCls">
-              <span>出库价格</span>
-              <el-input
-                v-if="dialogStatus === 'create'"
-                v-model="diff"
-                size="mini"
-                @mousewheel.native.prevent 
-                @input="multPrice"
-                placeholder="输入价格"/>
-            </div>
-          </template>
-          <template slot-scope="scope" v-if="!scope.row.leaf">
-            <el-input 
-              v-if="dialogStatus === 'create'"
-              v-model="scope.row.price"
-              class="edit-input"
-              size="mini"
-              type="number"
-              @mousewheel.native.prevent 
-              @input="sumary"
-            />
-            <span v-else>{{ scope.row.price }}</span>
-          </template>
         </el-table-column>
         <el-table-column v-if="dialogStatus === 'create'" label="库存" width="100px" align="center" prop="stock"></el-table-column>
-        <el-table-column label="数量" min-width="150px" align="center" prop="quantity">
+        <el-table-column label="补发数量" min-width="150px" align="center" prop="quantity">
           <template slot-scope="scope">
             <div :class="priceCls">
-              <div v-if="temp.order_id" class="price-div">
-                <el-tag type="info" size="small">{{ scope.row.order_quantity || 0 }}</el-tag>/
-              </div>
               <el-input 
                 v-if="dialogStatus === 'create' && scope.row.leaf"
                 v-model="scope.row.quantity"
@@ -114,27 +71,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="缺货" width="100px" align="center" prop="lack_quantity">
-          <template slot-scope="scope">
-            <el-input 
-              v-if="dialogStatus === 'create' && scope.row.leaf"
-              v-model="scope.row.lack_quantity"
-              class="edit-input"
-              type="number"
-              size="mini"
-              min="0"
-              @input="sumary"
-            />
-            <span v-else >{{ scope.row.lack_quantity }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="dialogStatus === 'create'" label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
-          <template slot-scope="scope" v-if="!scope.row.leaf">
-            <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end">
-              <el-button icon="el-icon-delete" size="mini" type="danger" @click="delRow(scope.$index)">
-              </el-button>
-            </el-tooltip>
-          </template>
+        <el-table-column v-if="dialogStatus === 'create'" label="缺货数量" width="100px" align="center" prop="lack_quantity">
         </el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
@@ -151,16 +88,13 @@
 </template>
 
 <script>
-import { addStockOut, getStockOutDetail } from '@/api/stockout'
-import { getOrderDetail } from '@/api/order'
-import { getExportProducts } from '@/api/product'
-import buyerSelect from '@/components/buyerSelect'
-import productBtnGroup from '@/components/productBtnGroup';
+import { getStockOutDetail } from '@/api/stockout'
+import { addReissue, getReissueDetail } from '@/api/reissue'
 import productPopover from '@/components/productPopover'
 
 export default {
-  name: 'modifyStockOut',
-  components: { buyerSelect, productBtnGroup, productPopover },
+  name: 'modifyReissue',
+  components: { productPopover },
   props: {
     row: {
       type: Object,
@@ -175,12 +109,13 @@ export default {
   data() {
     return {
       textMap: {
-        update: '编辑出库单',
-        create: '添加出库单',
-        view: '查看出库单'
+        update: '编辑补发单',
+        create: '添加补发单',
+        view: '查看补发单'
       },
       dialogShow: false,
       dialogStatus: '',
+      readOnly: false,
       btnLoding: false,
       sumPrice: 0,
       sumQuantity: 0,
@@ -190,11 +125,12 @@ export default {
       temp: {},
       defaultTemp: {
         id: undefined,
-        order_id: '',
+        stock_out_id: '',
         buyer_member_id: '',
         shipping_fee: '',
         remark: '',
         shipping_no: '',
+        shipping_fee: '',
         goods: []
       },
       rules: {}
@@ -211,13 +147,10 @@ export default {
       this.dialogStatus = status
       this.dialogShow = true
       this.priceCls = this.dialogStatus === 'create' ? 'price-cls' : 'price-label-cls'
+      this.readOnly = this.disabled !== 'create'
       this.$nextTick(() => {
         if (status === 'create') {
-          if (typeof(this.row.api_type) !== 'undefined' && this.row.api_type === 'order') {
-            this.getOrderDetail(this.row.order_id)
-          } else {
-            this.resetForm('dialogForm')
-          }
+          this.getStockOutDetail(this.row.id)
         } else {
           this.getDetail(this.row.id)
         }
@@ -229,20 +162,22 @@ export default {
     resetForm(formName) {
       this.temp = Object.assign({}, this.defaultTemp)
       this.temp.goods = []
-      this.$store.dispatch('addproduct/setSelected', this.temp.goods)
       if (this.$refs[formName] !== undefined) {
         this.$refs[formName].resetFields()
       }
-      this.$refs.buyerSelectRef.setValue(0)
     },
     handleFilter() {
       this.$emit('handleFilter')
     },
     submit(event) {
+      if (this.dialogStatus === 'view') {
+        this.closeDialog()
+        return
+      }
       this.$refs['dialogForm'].validate((valid) => {
         if (valid) {
           this.btnLoding = true
-          addStockOut(this.temp).then((res) => {
+          addReissue(this.temp).then((res) => {
             this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
@@ -254,46 +189,11 @@ export default {
       })
     },
     getDetail(id) {
-      getStockOutDetail({id: id}).then(res => {
+      getReissueDetail({ id: id }).then(res => {
         this.temp = res.response
-        this.priceCls = 'price-cls'
-        if (this.dialogStatus === 'view') {
-          this.priceCls = 'price-label-cls'
-        }
-        this.$store.dispatch('addproduct/setSelected', this.temp.goods)
-        this.$nextTick(() => {
-          this.$refs.buyerSelectRef.setValue(this.temp.buyer_login_id)
-        })
+        this.priceCls = 'price-label-cls'
         this.sumary()
       }).catch(() => {})
-    },
-    insertProduct(selected, type) {
-      type = type || 'select'
-      if (selected.length > 0) {
-        if (type === 'select') {
-          selected.forEach(sel => {
-            sel.lack_quantity = ''
-            this.pushProduct(sel)
-          })
-          this.sumary()
-          this.$store.dispatch('addproduct/setSelected', this.temp.goods)
-        }else {
-          getExportProducts({ data: selected, ext: ['单价', '数量'] }).then(res => {
-            if (res.response.length > 0) {
-              res.response.forEach(resp => {
-                this.pushProduct(resp)
-              })
-            }
-            this.$nextTick(() => {
-              this.sumary()
-            })
-          })
-        }
-      }
-    },
-    delRow(index) {
-      this.temp.goods.splice(index, 1)
-      this.$store.dispatch('addproduct/setSelected', this.temp.goods)
     },
     sumary() {
       this.sumQuantity = 0
@@ -305,7 +205,6 @@ export default {
             const price = parseFloat(item.price) || 0
             item.quantity = 0
             item.lack_quantity = 0
-            item.order_quantity = 0
             item.children.forEach(child => {
               const childQuantity = parseInt(child.quantity) || 0
               const childLackQuantity = parseInt(child.lack_quantity) || 0
@@ -315,7 +214,6 @@ export default {
               this.lackQuantity += childLackQuantity
               item.lack_quantity += childLackQuantity
               this.sumPrice += price * childQuantity
-              item.order_quantity += childOrderQuantity
             })
             //排序
             item.children = this.setSizeSort(item.children)
@@ -343,22 +241,10 @@ export default {
         return res
       })
     },
-    selectBuyer(value) {
-      this.temp.buyer_member_id = value
-    },
-    multPrice() {
-      if (this.dialogStatus === 'create' &&  Math.abs(this.diff) > 0 && this.temp.goods.length > 0) {
-        this.temp.goods.forEach(good => {
-          good.price = parseFloat(good.price) + parseFloat(this.diff)
-        })
-        this.sumary()
-      }
-    },
     editQuantity(row) {
       const stock = row.stock * 1
       if (row.quantity > stock) {
-        this.$message({ message: '库存不足', type: 'warning', showClose: true })
-        row.lack_quantity = row.quantity - stock
+        this.$message({ message: '【' + row.cargo_number + '】库存不足', type: 'warning', showClose: true })
         row.quantity = stock
       }
       this.sumary()
@@ -369,41 +255,15 @@ export default {
       }
       return 'success-row';
     },
-    getOrderDetail(orderId) {
+    getStockOutDetail(stockOutId) {
       const params = {
-        id: orderId,
-        api_type: 'stockout'
+        id: stockOutId,
+        api_type: 'reissue'
       }
-      getOrderDetail(params).then(res => {
+      getStockOutDetail(params).then(res => {
         this.temp = res.response
-        this.$store.dispatch('addproduct/setSelected', this.temp.goods)
-        this.$nextTick(() => {
-          this.$refs.buyerSelectRef.setValue(this.temp.buyer_login_id)
-        })
         this.sumary()
       }).catch(() => {})
-    },
-    pushProduct(product) {
-      let shouldPush = true
-      this.temp.goods.forEach(good => {
-        if (good.cargo_number === product.cargo_number) {
-          shouldPush = false
-          product.children.forEach(child => {
-            let childExist = false
-            good.children.forEach(gc => {
-              if (child.size === gc.size) {
-                childExist = true
-              }
-            })
-            if (!childExist) {
-              good.children.push(child)
-            }
-          })
-        }
-      })
-      if (shouldPush) {
-        this.temp.goods.push(product)
-      }
     },
     setSizeSort(children) {
       let result = []

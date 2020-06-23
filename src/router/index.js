@@ -190,10 +190,17 @@ export const asyncRoutes = [
       },
       {
         path: 'reissue',
-        component: () => import('@/views/stockout/index'),
+        component: () => import('@/views/reissue/index'),
         name: 'reissue',
         route: '',
         meta: { title: '补发', icon: 'reissue' }
+      },
+      {
+        path: 'inventory',
+        component: () => import('@/views/inventory/index'),
+        name: 'inventory',
+        route: '',
+        meta: { title: '盘点', icon: 'inventory' }
       }
     ]
   },

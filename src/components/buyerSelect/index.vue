@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="value" placeholder="请选择" clearable filterable :disabled="disabled" @change="change">
+  <el-select v-model="value" placeholder="请选择买家" clearable filterable :disabled="disabled" @change="change" :style="styleStr">
     <el-option
       v-for="item in options"
       :key="item.buyer_member_id"
@@ -21,6 +21,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    styleStr: {
+      type: String,
+      default: ''
     }
   },
   created() {
