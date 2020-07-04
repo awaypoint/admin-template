@@ -49,6 +49,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/reissuePrinte',
+    component: () => import('@/layout/views/reissuePrinter'),
+    hidden: true
+  },
+  {
     path: '/blog',
     component: () => import('@/layout/views/blog'),
     hidden: true
@@ -192,14 +197,14 @@ export const asyncRoutes = [
         path: 'reissue',
         component: () => import('@/views/reissue/index'),
         name: 'reissue',
-        route: '',
+        route: 'Reissue',
         meta: { title: '补发', icon: 'reissue' }
       },
       {
         path: 'inventory',
         component: () => import('@/views/inventory/index'),
         name: 'inventory',
-        route: '',
+        route: 'Inventory',
         meta: { title: '盘点', icon: 'inventory' }
       }
     ]
@@ -243,7 +248,35 @@ export const asyncRoutes = [
         component: () => import('@/views/selling/index'),
         name: 'selling',
         // route: 'Selling',
-        meta: { title: '销售数据', icon: 'selling' }
+        meta: { title: '产品销售数据', icon: 'selling' }
+      },
+      {
+        path: 'orderStatistics',
+        component: () => import('@/views/order/statistics'),
+        name: 'orderStatistics',
+        route: 'orderStatistics',
+        meta: { title: '订单统计', icon: 'selling' }
+      },
+      {
+        path: 'profitStatistics',
+        component: () => import('@/views/selling/index'),
+        name: 'profitStatistics',
+        // route: 'Selling',
+        meta: { title: '利润统计', icon: 'selling' }
+      },
+      {
+        path: 'stockNumStatistics',
+        component: () => import('@/views/selling/index'),
+        name: 'stockNumStatistics',
+        // route: 'Selling',
+        meta: { title: '出入库数量统计', icon: 'selling' }
+      },
+      {
+        path: 'stockAmountStatistics',
+        component: () => import('@/views/selling/index'),
+        name: 'stockAmountStatistics',
+        // route: 'Selling',
+        meta: { title: '出入库金额统计', icon: 'selling' }
       }
     ]
   },

@@ -63,7 +63,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">撤销
+          <el-button icon="el-icon-view" size="mini" type="" v-show="checkPermission('getStockInDetail')" @click="handleView(scope.row)">查看
+          </el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('cancelStockIn')" @click="handleDelete(scope.row.id)">撤销
           </el-button>
         </template>
       </el-table-column>

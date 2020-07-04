@@ -59,8 +59,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini"  icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button icon="el-icon-s-order" size="mini" type="primary" @click="handleOrderList(scope.row)">订单列表</el-button>
+          <el-button size="mini"  icon="el-icon-edit" v-show="checkPermission('getOrderDetail')" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-s-order" size="mini" type="primary" v-show="checkPermission('getOrderList')" @click="handleOrderList(scope.row)">订单列表</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -122,7 +122,6 @@ export default {
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleAdd() {

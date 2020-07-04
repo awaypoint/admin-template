@@ -13,6 +13,7 @@ import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 const templateFiles = {
   'stockin': '入库产品模板.xls',
   'stockout': '出库产品模板.xls',
+  'inventory': '盘点产品模板.xls',
 }
 
 export default {

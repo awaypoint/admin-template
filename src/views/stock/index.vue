@@ -46,20 +46,14 @@
       </el-table-column>
       <el-table-column label="销量" width="80px" align="center" prop="sale">
       </el-table-column>
-      <el-table-column label="缺货" width="80px" align="center" prop="quantity">
+      <el-table-column label="缺货" width="80px" align="center" prop="lack_quantity">
       </el-table-column>
       <el-table-column label="未发货" width="80px" align="center" prop="waitsend_quantity">
       </el-table-column>
-      <!-- <el-table-column label="创建时间" width="160px" align="center" sortable prop="created_at">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column> -->
       <el-table-column label="操作" align="center" min-width="100" prop="operate">
         <template scope="scope">
           <div v-if="typeof(scope.row.leaf) === 'undefined' || !scope.row.leaf">
-            <el-button size="mini" icon="el-icon-s-data" type="primary">销售数据</el-button>
+            <el-button size="mini" icon="el-icon-s-data" type="primary" v-show="checkPermission('productSale')">销售数据</el-button>
           </div>
         </template>
       </el-table-column>
@@ -113,7 +107,10 @@ export default {
   computed: {
     ...mapGetters([
       'permissions'
-    ])
+    ]),
+    sizeSort() {
+      return this.$store.state.const.sizeSort
+    }
   },
   created() {
     this.getList()
@@ -164,13 +161,15 @@ export default {
         cargo_number: row.cargo_number
       }
       getStockItems(params).then( res => {
+        //排序
+        const result = this.setSizeSort(res.response)
         setTimeout(() => {
-          resolve(res.response)
+          resolve(result)
         }, 0.3 * 1000);
       })
     },
     handleClick(row, index, e) {
-      if (index.property !== 'operate') {
+      if (index.property !== 'operate' && !row.leaf) {
         const expanded = this.$refs.listTable.store.states.treeData[row.id].expanded || false
         if (!expanded) {
           this.$refs.listTable.store.states.treeData[row.id].loaded = false
@@ -184,6 +183,17 @@ export default {
     },
     getSummaries() {
       return ['合计', '库存金额:' + this.amount, '库存数量:' + this.quantity]
+    },
+    setSizeSort(children) {
+      let result = []
+      this.sizeSort.forEach(size => {
+        children.forEach(c => {
+          if (c.cargo_number === size) {
+            result.push(c)
+          }
+        })
+      })
+      return result
     }
   }
 }

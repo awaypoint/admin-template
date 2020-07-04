@@ -18,22 +18,12 @@
         label-width="120px"
         class="dialog-form-cls"
       >
-        <el-row :gutter="10">
-          <el-col :span="12">
-            <el-form-item label="入库来源厂家" prop="factory">
-              <factorySelect ref="factorySelectRef" @selectFactory="selectFactory" :disabled="readOnly"></factorySelect>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="运费" prop="desc">
-          <el-input v-model="temp.shipping" :readOnly="readOnly"/>
-        </el-form-item>
         <el-form-item label="备注" prop="desc">
           <el-input v-model="temp.remark" type="textarea" :readOnly="readOnly"/>
         </el-form-item>
       </el-form>
       <el-divider></el-divider>
-      <productBtnGroup v-if="!readOnly" templateType="stockin" @insertProduct="insertProduct"></productBtnGroup>
+      <productBtnGroup v-if="!readOnly" templateType="inventory" @insertProduct="insertProduct"></productBtnGroup>
       <el-table
         row-key="id"
         :data="temp.goods"
@@ -44,6 +34,7 @@
         default-expand-all
         :summary-method="getSummaries"
         show-summary
+        :row-class-name="tableRowClassName"
       >
         <el-table-column label="序号" type="index" width="50" align="center">
         </el-table-column>
@@ -53,26 +44,17 @@
             <span v-else>{{ scope.row.size }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="入库价格" min-width="100px" align="center" prop="price">
-          <template slot-scope="scope" v-if="!scope.row.leaf">
-            <el-input 
-              v-model="scope.row.price"
-              class="edit-input"
-              size="small"
-              :readonly="readOnly"
-              @input="sumary"
-            />
-          </template>
-        </el-table-column>
         <el-table-column label="数量" min-width="140px" align="center">
           <template slot-scope="scope">
             <el-input 
+              v-if="!readOnly"
               v-model="scope.row.quantity"
               class="edit-input"
               size="small"
               :readOnly="!scope.row.leaf"
               @input="sumary"
             />
+            <span v-else>{{ scope.row.quantity }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width" v-if="!readOnly">
@@ -96,15 +78,14 @@
 </template>
 
 <script>
-import { addStockIn, getStockInDetail } from '@/api/stockin'
+import { addInventory, getInventoryDetail } from '@/api/inventory'
 import { getExportProducts } from '@/api/product'
-import factorySelect from '@/components/factorySelect'
 import productPopover from '@/components/productPopover'
 import productBtnGroup from '@/components/productBtnGroup'
 
 export default {
-  name: 'modifyStockIn',
-  components: { factorySelect, productPopover, productBtnGroup },
+  name: 'modifyInventory',
+  components: { productPopover, productBtnGroup },
   props: {
     row: {
       type: Object,
@@ -114,9 +95,9 @@ export default {
   data() {
     return {
       textMap: {
-        update: '编辑入库单',
-        create: '添加入库单',
-        view: '查看入库单'
+        update: '编辑盘点单',
+        create: '添加盘点单',
+        view: '查看盘点单'
       },
       readOnly: false,
       dialogShow: false,
@@ -127,17 +108,10 @@ export default {
       temp: {},
       defaultTemp: {
         id: undefined,
-        factory: '',
-        type: '1',
-        shipping: '',
         remark: '',
         goods: []
       },
-      rules: {
-        name: [
-          { required: true, trigger: 'blur', message: '请填写店铺名称' }
-        ]
-      },
+      rules: {},
       tagTypeArr: ['info', 'warning', '', 'success',  'danger'],
     }
   },
@@ -174,23 +148,17 @@ export default {
       if (this.$refs[formName] !== undefined) {
         this.$refs[formName].resetFields()
       }
-      if (this.$refs.factorySelectRef !== undefined) {
-        this.$refs.factorySelectRef.setValue('')
-      }
       this.$store.dispatch('addproduct/setSelected', this.temp.goods)
-    },
-    handleFilter() {
-      this.$emit('handleFilter')
     },
     submit(event) {
       this.$refs['dialogForm'].validate((valid) => {
         if (valid) {
           this.btnLoding = true
-          addStockIn(this.temp).then((res) => {
+          addInventory(this.temp).then((res) => {
             this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
             this.dialogShow = false
             this.btnLoding = false
-            this.handleFilter()
+            this.$emit('handleFilter')
           }).catch(() => {
             this.btnLoding = false
           })
@@ -198,12 +166,8 @@ export default {
       })
     },
     getDetail(id) {
-      getStockInDetail({ id: id}).then(res => {
+      getInventoryDetail({ id: id}).then(res => {
         this.temp = res.response
-        this.$store.dispatch('addproduct/setSelected', this.temp.goods)
-        this.$nextTick(() => {
-          this.$refs.factorySelectRef.setValue(this.temp.factory)
-        })
         this.sumary()
       }).catch(() => {})
     },
@@ -234,9 +198,6 @@ export default {
       this.temp.goods.splice(index, 1)
       this.$store.dispatch('addproduct/setSelected', this.temp.goods)
     },
-    selectFactory(value) {
-      this.temp.factory = value
-    },
     sumary() {
       this.sumQuantity = 0
       this.sumPrice = 0
@@ -257,7 +218,7 @@ export default {
       }
     },
     getSummaries() {
-      return ['', '合计', this.sumPrice, this.sumQuantity]
+      return ['', '合计', this.sumQuantity]
     },
     pushProduct(product) {
       let shouldPush = true
@@ -280,7 +241,18 @@ export default {
       if (shouldPush) {
         this.temp.goods.push(product)
       }
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (typeof(row.leaf) === 'undefined' || !row.leaf) {
+        return '';
+      }
+      return 'success-row';
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+/deep/.el-table .success-row {
+  background: #f0f9eb;
+}
+</style>

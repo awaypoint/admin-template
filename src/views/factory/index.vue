@@ -54,8 +54,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('updateFactory')" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('delFactroy')" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

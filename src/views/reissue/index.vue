@@ -2,7 +2,10 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getStockOutList')" @click="handleFilter">
+        <el-button class="filter-item pan-btn green-btn" type="primary" icon="el-icon-printer" v-show="checkPermission('getPrintOutOrders')" @click="handlePrinte">
+          打印
+        </el-button>
+        <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getRepList')" @click="handleFilter">
           查询
         </el-button>
       </div>
@@ -39,6 +42,7 @@
       @sort-change="sortChange"
       @row-click="handleClick"
     >
+      <el-table-column type="selection" width="50px" align="center"></el-table-column>
       <el-table-column label="出库单号" min-width="200px" align="center" prop="item_no">
         <template slot-scope="scope">
           <a class="item-no-cls" @click="clickItemNo(scope.row)">{{ scope.row.item_no }}</a>
@@ -64,9 +68,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130px" class-name="small-padding fixed-width" prop="operate">
         <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('updateStockOut') && !scope.row.leaf" @click="handleAdd(scope.row)">补发</el-button>
-          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('delStockOut') && !scope.row.leaf" @click="handleDelete(scope.row.id)">撤销
-          </el-button>
+          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('addReissue') && !scope.row.leaf" @click="handleAdd(scope.row)">补发</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -165,18 +167,6 @@ export default {
         this.listLoading = false
       })
     },
-    handleDelete(id) {
-      this.$confirm('此操作将永久删除该出库单, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        del({ 'id': id }).then((res) => {
-          this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
-          this.handleFilter()
-        })
-      }).catch(() => {})
-    },
     selectBuyer(value) {
       this.listQuery.buyer_member_id = value
       this.handleFilter()
@@ -216,6 +206,22 @@ export default {
       }
       this.stockoutRow.id = this.stockoutRow.real_id
       this.$refs.modifyReissueDialog.showDialog('view')
+    },
+    handlePrinte() {
+      const selection = this.$refs.listTable.selection
+      let list = []
+      selection.forEach(s => {
+        if (!s.leaf) {
+          list.push(s.id)
+        }
+      })
+      if (list.length <= 0) {
+        this.$message({ message: '请先选择需要打印的补发单', type: 'warning', showClose: true })
+        return
+      }
+      this.$store.dispatch('order/setSelectStockout', list)
+      const routeData = this.$router.resolve({ path: '/reissuePrinte' });
+      window.open(routeData.href, '_blank');
     }
   }
 }
@@ -223,9 +229,5 @@ export default {
 <style lang='scss' scoped>
 /deep/.el-table .success-row {
   background: #f0f9eb;
-}
-.item-no-cls {
-  color: #409EFF;
-  cursor: pointer;
 }
 </style>

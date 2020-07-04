@@ -65,6 +65,9 @@ const actions = {
   setSelectOrders({ commit }, data) {
     localStorage.setItem("selectOrderIds", JSON.stringify(data));
     // commit('CHANGE_ATTR', { key: 'selectOrderIds', value: data })
+  },
+  setSelectStockout({ commit }, data) {
+    localStorage.setItem("selectStockoutIds", JSON.stringify(data));
   }
 }
 

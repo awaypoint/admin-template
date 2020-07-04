@@ -19,7 +19,7 @@
         <el-row :gutter="10">
           <el-col :span="12">
             <el-form-item label="买家">
-              <buyerSelect ref="buyerSelectRef" :type="2" @selectBuyer="selectBuyer" :disabled="this.temp.order_id !== ''"></buyerSelect>
+              <buyerSelect ref="buyerSelectRef" :type="2" @selectBuyer="selectBuyer" :disabled="temp.order_id !== '' || isView"></buyerSelect>
             </el-form-item>
           </el-col>
           <el-col :span="12" v-if="temp.order_id">
@@ -31,17 +31,17 @@
         <el-row :gutter="10">
           <el-col :span="12">
             <el-form-item label="运费">
-              <el-input v-model="temp.shipping_fee"/>
+              <el-input v-model="temp.shipping_fee" :readonly="isView"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="快递单号">
-              <el-input v-model="temp.shipping_no"/>
+              <el-input v-model="temp.shipping_no" :readonly="isView"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="temp.remark" type="textarea"/>
+          <el-input v-model="temp.remark" type="textarea" :readonly="isView"/>
         </el-form-item>
       </el-form>
       <el-divider></el-divider>
@@ -93,7 +93,11 @@
             <span v-else>{{ scope.row.price }}</span>
           </template>
         </el-table-column>
-        <el-table-column v-if="dialogStatus === 'create'" label="库存" width="100px" align="center" prop="stock"></el-table-column>
+        <el-table-column v-if="dialogStatus === 'create'" label="库存" width="100px" align="center" prop="stock">
+          <template slot-scope="scope">
+            <span>{{ scope.row.stock }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="数量" min-width="150px" align="center" prop="quantity">
           <template slot-scope="scope">
             <div :class="priceCls">
@@ -110,7 +114,7 @@
                 @mousewheel.native.prevent 
                 @input="editQuantity(scope.row)"
               />
-              <span v-else >{{ scope.row.quantity }}</span>
+              <el-tag v-else size="small">{{ scope.row.quantity }}</el-tag>
             </div>
           </template>
         </el-table-column>
@@ -125,7 +129,7 @@
               min="0"
               @input="sumary"
             />
-            <span v-else >{{ scope.row.lack_quantity }}</span>
+            <el-tag v-else size="small">{{ scope.row.lack_quantity }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column v-if="dialogStatus === 'create'" label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
@@ -142,7 +146,7 @@
         <el-button 
           type="primary" 
           size="small" 
-          @click="submit($event)"
+          @click="dialogStatus==='create' ? submit($event) : closeDialog()"
           :loading="btnLoding"
         >确认</el-button>
       </div>
@@ -187,6 +191,7 @@ export default {
       lackQuantity: 0,
       diff: '',
       priceCls: '',
+      isView: false,
       temp: {},
       defaultTemp: {
         id: undefined,
@@ -211,6 +216,7 @@ export default {
       this.dialogStatus = status
       this.dialogShow = true
       this.priceCls = this.dialogStatus === 'create' ? 'price-cls' : 'price-label-cls'
+      this.isView = this.dialogStatus !== 'create'
       this.$nextTick(() => {
         if (status === 'create') {
           if (typeof(this.row.api_type) !== 'undefined' && this.row.api_type === 'order') {
@@ -429,6 +435,9 @@ export default {
 }
 .price-cls .price-div {
   width: 60%;
+}
+.price-div {
+  display: inline;
 }
 .price-cls div {
   margin-left: 3px;

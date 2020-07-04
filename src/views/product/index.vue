@@ -53,8 +53,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button v-if="scope.row.alibaba === '0'" icon="el-icon-delete" size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('updateProduct')" @click="handleUpdate(scope.row)">编辑</el-button>
+          <el-button v-if="scope.row.alibaba === '0'" icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('delProduct')" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -125,10 +125,6 @@ export default {
     handleUpdate(row) {
       this.productRow = row
       this.$refs.modifyProductDialog.showDialog('update')
-    },
-    handleView(row) {
-      this.productRow = row
-      this.$refs.viewProductDialog.showDialog('view')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop

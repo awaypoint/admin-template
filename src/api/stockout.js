@@ -24,17 +24,9 @@ export function getStockOutDetail(data) {
   })
 }
 
-export function updateStockIn(data) {
+export function getPrintOutOrders(data) {
   return request({
-    url: 'updateFactory',
-    method: 'post',
-    data
-  })
-}
-
-export function delStockIn(data) {
-  return request({
-    url: 'delFactroy',
+    url: 'getPrintOutOrders',
     method: 'post',
     data
   })

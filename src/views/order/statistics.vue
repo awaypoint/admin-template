@@ -2,27 +2,12 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
-        <el-button class="filter-item pan-btn green-btn" type="primary" icon="el-icon-printer" v-show="checkPermission('printOrder')" @click="handlePrinte">
-          打印
-        </el-button>
         <el-button class="filter-item pan-btn light-blue-btn" type="primary" icon="el-icon-search" v-show="checkPermission('getOrderList')" @click="handleFilter">
           查询
         </el-button>
       </div>
-      <el-input v-model="listQuery.order_id" placeholder="请输入订单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.shipping_no" placeholder="请输入快递单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.status" style="width: 160px" class="filter-item" @change="handleFilter" placeholder="状态" clearable>
         <el-option v-for="item in statusOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.type" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="类型" clearable>
-        <el-option v-for="item in typeOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-input v-model="listQuery.to_full_name" placeholder="请输入买家" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.is_printed" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="是否打印" clearable>
-        <el-option v-for="item in boolOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.is_stock" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="是否出库" clearable>
-        <el-option v-for="item in boolOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
       <el-date-picker class="filter-item"
         v-model="listQuery.times"
@@ -36,68 +21,6 @@
       >
       </el-date-picker>
     </div>
-
-    <el-table
-      :key="tableKey"
-      v-loading="listLoading"
-      ref="orderTableRef"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-      show-summary
-      :summary-method="getSummaries"
-      style="width: 100%;"
-      @sort-change="sortChange"
-    >
-      <el-table-column type="selection" width="50px" align="center"></el-table-column>
-      <el-table-column label="订单号" min-width="180px">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.type == 2 ? 'info' : 'success'">{{ typeMap[scope.row.type] }}</el-tag>
-          <span>{{ scope.row.order_id }}</span>
-          <el-tag v-if="scope.row.is_printed === '1'" type='info'>印</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="产品数量" min-width="80px" align="center" prop="product_num">
-      </el-table-column>
-      <el-table-column label="总金额" min-width="120px" align="center" prop="total_amount">
-      </el-table-column>
-      <el-table-column label="买家" min-width="160px" align="center">
-        <template slot-scope="scope">
-          <img src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
-          <el-tag type="">{{ scope.row.to_full_name }}</el-tag>
-          <span>{{ scope.row.buyer_login_id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" width="150px" align="center" show-overflow-tooltip>
-        <template slot-scope="scope">
-          <span>{{ statusMap[scope.row.status] }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="下单时间" width="160px" align="center" sortable prop="created_at">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.order_created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-view" v-show="checkPermission('getOrderDetail')" @click="handleUpdate(scope.row)">查看</el-button>
-          <el-button icon="el-icon-brush" size="mini" type="danger" v-show="checkPermission('brushOrder')" @click="handleBrush(scope.row.id)">{{ scope.row.type === '1' ? '刷单' : '取消刷单' }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size"
-      @pagination="getList"
-    />
-    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter" @handleStock="handleStock"></modifyOrderDialog>
-    <modifyStockDialog ref="modifyStockOutDialogRef" :row="stockoutRow" @handleFilter="handleFilter"></modifyStockDialog>
   </div>
 </template>
 
@@ -132,9 +55,7 @@ export default {
         is_printed: undefined,
         is_stock: undefined,
         times: undefined
-      },
-      orderRow: {},
-      stockoutRow: {}
+      }
     }
   },
   computed: {

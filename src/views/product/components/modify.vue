@@ -222,7 +222,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="closeDialog">取消</el-button>
-        <el-button size="small" @click="printSize" v-if="dialogStatus !== 'create'">打印尺码表</el-button>
+        <el-button size="small" v-show="dialogStatus !== 'create'" @click="printSize">打印尺码表</el-button>
         <el-button
           type="primary"
           size="small"
@@ -255,7 +255,8 @@ export default {
       key:1,
       textMap: {
         create: '添加商品',
-        update: '编辑商品'
+        update: '编辑商品',
+        view: '查看商品',
       },
       dialogShow: false,
       dialogStatus: 'create',

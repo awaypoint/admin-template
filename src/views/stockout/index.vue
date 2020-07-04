@@ -36,6 +36,9 @@
       @sort-change="sortChange"
     >
       <el-table-column label="出库单号" width="200px" align="center" prop="item_no">
+        <template slot-scope="scope">
+          <a class="item-no-cls" @click="handleView(scope.row)">{{ scope.row.item_no }}</a>
+        </template>
       </el-table-column>
       <el-table-column label="买家" width="200px" align="center" prop="buyer_login_id">
       </el-table-column>
@@ -55,8 +58,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="130px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" icon="el-icon-edit" v-show="checkPermission('updateStockOut')" @click="handleUpdate(scope.row)">查看</el-button>
-          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('delStockOut')" @click="handleDelete(scope.row.id)">撤销
+          <el-button size="mini" icon="el-icon-view" v-show="checkPermission('getStockOutDetail')" @click="handleView(scope.row)">查看</el-button>
+          <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('cancelStockOut')" @click="handleDelete(scope.row.id)">撤销
           </el-button>
         </template>
       </el-table-column>
@@ -127,9 +130,9 @@ export default {
     handleAdd() {
       this.$refs.modifyStockOutDialog.showDialog('create')
     },
-    handleUpdate(row) {
+    handleView(row) {
       this.stockoutRow = row
-      this.$refs.modifyStockOutDialog.showDialog('update')
+      this.$refs.modifyStockOutDialog.showDialog('view')
     },
     sortChange(column) {
       this.listQuery.order_by = column.prop
