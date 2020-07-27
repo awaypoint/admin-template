@@ -35,6 +35,9 @@
         @change="handleFilter"
       >
       </el-date-picker>
+      <el-select v-model="listQuery.is_exception" style="width: 140px" class="filter-item" @change="handleFilter" placeholder="是否异常" clearable>
+        <el-option v-for="item in boolOptions" :key="item.key" :label="item.label" :value="item.key" />
+      </el-select>
     </div>
 
     <el-table
@@ -56,6 +59,7 @@
           <el-tag :type="scope.row.type == 2 ? 'info' : 'success'">{{ typeMap[scope.row.type] }}</el-tag>
           <span>{{ scope.row.order_id }}</span>
           <el-tag v-if="scope.row.is_printed === '1'" type='info'>印</el-tag>
+          <el-tag v-if="scope.row.is_exception === '1'" type='danger'>异</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="产品数量" min-width="80px" align="center" prop="product_num">
@@ -64,9 +68,8 @@
       </el-table-column>
       <el-table-column label="买家" min-width="160px" align="center">
         <template slot-scope="scope">
-          <img src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
           <el-tag type="">{{ scope.row.to_full_name }}</el-tag>
-          <span>{{ scope.row.buyer_login_id }}</span>
+          <a class="item-no-cls" @click="clickBuyer(scope.row)">{{ scope.row.buyer_login_id }}</a>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="150px" align="center" show-overflow-tooltip>
@@ -74,7 +77,7 @@
           <span>{{ statusMap[scope.row.status] }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="下单时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="下单时间" width="160px" align="center" sortable="custom" prop="order_created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.order_created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -127,10 +130,11 @@ export default {
         status: undefined,
         to_full_name: '',
         buyer_login_id: '',
-        order_by: undefined,
-        sort_by: undefined,
+        order_by: 'created_at',
+        sort_by: 'desc',
         is_printed: undefined,
         is_stock: undefined,
+        is_exception: undefined,
         times: undefined
       },
       orderRow: {},
@@ -148,7 +152,7 @@ export default {
       return this.$store.state.order.orderTypeMap
     },
     query() {
-      return this.$store.state.order.query
+      return this.$store.state.const.query
     },
     statusOptions() {
       return this.$store.state.order.orderStatusOptions
@@ -165,10 +169,11 @@ export default {
   },
   created() {
     if (this.query) {
-      this.listQuery = Object.assign(this.listQuery, this.query)
-      this.$store.dispatch('const/setQuery', {})
+      const query = this.query
+      this.listQuery = Object.assign(this.listQuery, query)
     }
     this.getList()
+    this.$store.dispatch('const/clearQuery');
   },
   methods: {
     checkPermission(check) {
@@ -228,6 +233,10 @@ export default {
       setTimeout(() => {
         this.$refs.modifyStockOutDialogRef.showDialog('create')
       }, 0.5 * 1000);
+    },
+    clickBuyer(row) {
+      this.listQuery.to_full_name = row.to_full_name
+      this.getList()
     }
   }
 }

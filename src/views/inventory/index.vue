@@ -45,7 +45,7 @@
           <span>{{ scope.row.quantity }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="盘点时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="盘点时间" width="160px" align="center" sortable="custom" prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>

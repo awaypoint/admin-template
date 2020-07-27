@@ -10,7 +10,7 @@
         </el-button>
       </div>
       <el-input v-model="listQuery.item_no" placeholder="请输入出库单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <buyerSelect ref="buyerSelectRef" @selectBuyer="selectBuyer" :styleStr="styleStr"></buyerSelect>
+      <el-input v-model="listQuery.to_full_name" placeholder="请输入买家" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.shipping_no" placeholder="请输入快递单号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-date-picker class="filter-item"
         v-model="listQuery.times"
@@ -40,25 +40,31 @@
           <a class="item-no-cls" @click="handleView(scope.row)">{{ scope.row.item_no }}</a>
         </template>
       </el-table-column>
-      <el-table-column label="买家" width="200px" align="center" prop="buyer_login_id">
+      <el-table-column label="买家" min-width="150px" align="center" prop="buyer_login_id">
+        <template slot-scope="scope">
+          <img v-show="scope.row.to_full_name" src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
+          <el-tag type="" v-show="scope.row.to_full_name">{{ scope.row.to_full_name }}</el-tag>
+          <span>{{ scope.row.buyer_login_id }}</span>
+        </template>
       </el-table-column>
-      <el-table-column label="出库数量" min-width="120px" align="center" prop="quantity">
+      <el-table-column label="出库数量" width="120px" align="center" prop="quantity">
       </el-table-column>
-      <el-table-column label="出库金额" min-width="120px" align="center" prop="amount">
+      <el-table-column label="出库金额" width="150px" align="center" prop="amount">
       </el-table-column>
-      <el-table-column label="运费" min-width="120px" align="center" prop="shipping_fee">
+      <el-table-column label="运费" width="100px" align="center" prop="shipping_fee">
       </el-table-column>
-      <el-table-column label="缺货" min-width="120px" align="center" prop="lack_quantity">
+      <el-table-column label="缺货" width="100px" align="center" prop="lack_quantity">
       </el-table-column>
-      <el-table-column label="出库时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="出库时间" width="160px" align="center" sortable="custom" prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="130px" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="300px" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" icon="el-icon-view" v-show="checkPermission('getStockOutDetail')" @click="handleView(scope.row)">查看</el-button>
+          <el-button size="mini" icon="el-icon-s-order" v-show="checkPermission('getOrderList') && scope.row.order_id" @click="handleViewOrder(scope.row)">查看订单</el-button>
           <el-button icon="el-icon-delete" size="mini" type="danger" v-show="checkPermission('cancelStockOut')" @click="handleDelete(scope.row.id)">撤销
           </el-button>
         </template>
@@ -73,21 +79,22 @@
       @pagination="getList"
     />
     <modifyStockOut ref="modifyStockOutDialog" :row="stockoutRow" @handleFilter="handleFilter"></modifyStockOut>
-
+    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter"></modifyOrderDialog>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { getStockOutList, delStockIn } from '@/api/stockout'
+import { getStockOutList, cancelStockOut } from '@/api/stockout'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-import { checkPermission } from '@/utils/index'
+import { checkPermission, deepClone } from '@/utils/index'
 import modifyStockOut from './components/modify'
 import buyerSelect from '@/components/buyerSelect'
+import modifyOrderDialog from '@/views/order/components/modify';
 
 export default {
   name: 'StockOut',
-  components: { Pagination, modifyStockOut, buyerSelect },
+  components: { Pagination, modifyStockOut, buyerSelect, modifyOrderDialog },
   data() {
     return {
       tableKey: 0,
@@ -102,10 +109,11 @@ export default {
         shipping_no: undefined,
         order_by: undefined,
         sort_by: undefined,
-        buyer_member_id: undefined
+        to_full_name: undefined
       },
       stockoutRow: {},
-      styleStr: 'display: inline-block;vertical-align: middle;margin-bottom: 10px;width:150px;'
+      styleStr: 'display: inline-block;vertical-align: middle;margin-bottom: 10px;width:150px;',
+      orderRow: {}
     }
   },
   computed: {
@@ -114,10 +122,18 @@ export default {
     ]),
     pickerOptions() {
       return this.$store.state.const.pickerOptions
+    },
+    query() {
+      return this.$store.state.const.query
     }
   },
   created() {
+    if (this.query) {
+      const query = this.query
+      this.listQuery = Object.assign(this.listQuery, query)
+    }
     this.getList()
+    this.$store.dispatch('const/clearQuery');
   },
   methods: {
     checkPermission(check) {
@@ -157,15 +173,21 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        del({ 'id': id }).then((res) => {
+        cancelStockOut({ 'id': id }).then((res) => {
           this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
           this.handleFilter()
-        })
+        }).catch(() => {})
       }).catch(() => {})
     },
     selectBuyer(value) {
       this.listQuery.buyer_member_id = value
       this.handleFilter()
+    },
+    handleViewOrder(row) {
+      this.orderRow = deepClone(row)
+      this.orderRow.id = this.orderRow.order_id
+      this.orderRow.api_type = 'stockoutview'
+      this.$refs.modifyOrderDialog.showDialog('view')
     }
   }
 }

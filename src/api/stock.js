@@ -15,3 +15,11 @@ export function getStockItems(data) {
     data
   })
 }
+
+export function getStockLogList(data) {
+  return request({
+    url: 'getStockLogList',
+    method: 'post',
+    data
+  })
+}

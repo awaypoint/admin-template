@@ -33,10 +33,17 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange"
+      header-cell-class-name="table-header-center"
     >
+      <el-table-column label="产品图片" width="150px" align="center">
+        <template slot-scope="scope">
+          <imagePreview :url="scope.row.image"></imagePreview>
+        </template>
+      </el-table-column>
       <el-table-column label="产品名称" min-width="250px" align="left">
         <template slot-scope="scope">
-          <productPopover :data="scope.row" :reference="scope.row.subject" @click="handleUpdate"></productPopover>
+          <a class="popover-a" @click="handleUpdate(scope.row)">{{ scope.row.subject }}</a>
+          <!-- <productPopover :data="scope.row" :reference="scope.row.subject" @click="handleUpdate"></productPopover> -->
         </template>
       </el-table-column>
       <el-table-column label="货号" min-width="160px" align="center" prop="product_cargo_number">
@@ -45,7 +52,7 @@
       </el-table-column>
       <el-table-column label="平台价" align="center" prop="platform_price">
       </el-table-column>
-      <el-table-column label="上架时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="上架时间" width="160px" align="center" sortable="custom" prop="product_created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.product_created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -77,11 +84,12 @@ import Pagination from '@/components/Pagination'
 import { checkPermission } from '@/utils/index'
 import modifyProductDialog from './components/modify'
 import viewProductDialog from './components/view'
-import productPopover from '@/components/productPopover'
+// import productPopover from '@/components/productPopover'
+import imagePreview from '@/components/imagePreview'
 
 export default {
   name: 'Product',
-  components: { Pagination, modifyProductDialog, viewProductDialog, productPopover },
+  components: { Pagination, modifyProductDialog, viewProductDialog, imagePreview },
   data() {
     return {
       tableKey: 0,
@@ -93,8 +101,8 @@ export default {
         page_size: 10,
         subject: undefined,
         product_cargo_number: undefined,
-        order_by: undefined,
-        sort_by: undefined,
+        order_by: 'product_created_at',
+        sort_by: 'desc',
         times: undefined
       },
       productRow: {}
@@ -152,9 +160,12 @@ export default {
         delProduct({ 'id': id }).then((res) => {
           this.$message({ message: res.codemsg || '操作成功', type: 'success', showClose: true })
           this.handleFilter()
-        })
+        }).catch(() => {})
       }).catch(() => {})
     }
   }
 }
 </script>
+<style lang="scss">
+
+</style>

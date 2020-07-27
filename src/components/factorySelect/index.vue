@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="value" placeholder="请选择厂家" clearable filterable @change="change" :style="styleStr || ''"
+  <el-select v-model="value" placeholder="请选择厂家" clearable filterable @change="change" :style="styleStr"
   :disabled="disabled">
     <el-option
       v-for="item in options"
@@ -15,20 +15,24 @@ import { getFactoryCombo } from '@/api/factory'
 export default {
   name: 'factorySelect',
   props: {
-    styleStr: {
-      type: String
-    },
     disabled: {
+      default: false
+    },
+    isQuery: {
       default: false
     }
   },
   created() {
     this.getList()
+    if (this.isQuery) {
+      this.styleStr = 'display: inline-block;vertical-align: middle;margin-bottom: 10px;width:150px;'
+    }
   },
   data() {
     return {
       options: [],
-      value: ''
+      value: '',
+      styleStr: ''
     }
   },
   methods: {

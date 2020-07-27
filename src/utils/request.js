@@ -48,7 +48,7 @@ service.interceptors.response.use(
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 0) {
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 91 || res.code === 50012 || res.code === 50014) {
+      if (res.code === 91 || res.code === 92 || res.code === 50012 || res.code === 50014) {
         // to re-login
         MessageBox.confirm('登录已过期，请重新登录', '登录过期提醒', {
           confirmButtonText: '重新登录',

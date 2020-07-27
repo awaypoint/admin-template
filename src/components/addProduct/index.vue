@@ -59,6 +59,7 @@
       />
       <div class="add-product-insert-btn">
         <el-button size="mini" type="primary" @click="choose">选好了</el-button> 
+        <el-button size="mini" type="" @click="close">关闭</el-button> 
       </div>
     </div>
     <el-button type="primary" slot="reference" size="small" :icon="btnIcon" @click="click" class="add-product-btn-cls">添加产品</el-button>
@@ -147,7 +148,7 @@ export default {
     },
     choose() {
       this.setMultSelect()
-      this.close()
+      // this.close()
       this.$emit('insertProduct', this.multipleSelection)
     },
     handleSelect(selection) {

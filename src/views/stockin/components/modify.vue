@@ -9,6 +9,7 @@
       width="800px" 
       ref="childForm"
       @close="closeDialog"
+      :row-class-name="tableRowClassName"
     >
       <el-form
         ref="dialogForm"
@@ -44,6 +45,7 @@
         default-expand-all
         :summary-method="getSummaries"
         show-summary
+        :row-class-name="tableRowClassName"
       >
         <el-table-column label="序号" type="index" width="50" align="center">
         </el-table-column>
@@ -56,23 +58,28 @@
         <el-table-column label="入库价格" min-width="100px" align="center" prop="price">
           <template slot-scope="scope" v-if="!scope.row.leaf">
             <el-input 
+              v-if="dialogStatus === 'create'"
               v-model="scope.row.price"
               class="edit-input"
               size="small"
               :readonly="readOnly"
               @input="sumary"
             />
+            <span v-else>{{ scope.row.quantity }}</span>
           </template>
         </el-table-column>
         <el-table-column label="数量" min-width="140px" align="center">
           <template slot-scope="scope">
             <el-input 
+              v-if="dialogStatus === 'create' && scope.row.leaf"
               v-model="scope.row.quantity"
               class="edit-input"
               size="small"
               :readOnly="!scope.row.leaf"
               @input="sumary"
             />
+            <el-tag v-else-if="!scope.row.leaf" size="small">{{ scope.row.quantity }}</el-tag>
+            <span v-else>{{ scope.row.quantity }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width" v-if="!readOnly">
@@ -150,6 +157,9 @@ export default {
   computed: {
     typeOptions() {
       return this.$store.state.const.boolOptions
+    },
+    sizeSort() {
+      return this.$store.state.const.sizeSort
     }
   },
   methods: {
@@ -214,6 +224,7 @@ export default {
           selected.forEach(sel => {
             this.pushProduct(sel)
           })
+          this.sumary()
           this.$store.dispatch('addproduct/setSelected', this.temp.goods)
         }else {
           getExportProducts({ data: selected, ext: ['单价', '数量'] }).then(res => {
@@ -253,6 +264,8 @@ export default {
             this.sumQuantity += quantitySum
             this.sumPrice += parseFloat(price) * quantitySum
           }
+          //排序
+          item.children = this.setSizeSort(item.children)
         })
       }
     },
@@ -280,7 +293,29 @@ export default {
       if (shouldPush) {
         this.temp.goods.push(product)
       }
+    },
+    setSizeSort(children) {
+      let result = []
+      this.sizeSort.forEach(size => {
+        children.forEach(c => {
+          if (c.size === size) {
+            result.push(c)
+          }
+        })
+      })
+      return result
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (typeof(row.leaf) === 'undefined' || !row.leaf) {
+        return '';
+      }
+      return 'success-row';
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+/deep/.el-table .success-row {
+  background: #f0f9eb;
+}
+</style>

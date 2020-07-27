@@ -24,6 +24,14 @@ export function getStockOutDetail(data) {
   })
 }
 
+export function cancelStockOut(data) {
+  return request({
+    url: 'cancelStockOut',
+    method: 'post',
+    data
+  })
+}
+
 export function getPrintOutOrders(data) {
   return request({
     url: 'getPrintOutOrders',

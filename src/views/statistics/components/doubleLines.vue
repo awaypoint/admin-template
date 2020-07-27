@@ -20,7 +20,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '600px'
     },
     autoResize: {
       type: Boolean,
@@ -65,20 +65,16 @@ export default {
       this.chart.setOption({
         xAxis: {
           data: this.chartData.xAxis,
-          boundaryGap: false,
+          boundaryGap: true,
           axisTick: {
             show: false
-          },
-          // axisLabel: {
-          //   interval: 0,
-          //   rotate: 40
-          // }
+          }
         },
         grid: {
           left: 10,
           right: 30,
           bottom: 20,
-          top: 30,
+          top: 50,
           containLabel: true
         },
         tooltip: {
@@ -88,16 +84,28 @@ export default {
           },
           padding: [5, 10]
         },
-        yAxis: {
-          axisTick: {
-            show: false
+        yAxis: [
+          {
+            type: 'value',
+            name: this.chartData.firstName,
+            max: function(value) {
+                return parseFloat(value.max * 1.1).toFixed(2);
+            }
+          },
+          {
+            type: 'value',
+            name: this.chartData.secName,
+            max: function(value) {
+                return parseFloat(value.max * 1.1).toFixed(2);
+            }
           }
-        },
+        ],
         legend: {
-          data: [this.chartData.name]
+          data: this.chartData.name
         },
         series: [{
-          name: this.chartData.name, itemStyle: {
+          name: this.chartData.firstName,
+          itemStyle: {
             normal: {
               color: '#FF005A',
               lineStyle: {
@@ -106,11 +114,25 @@ export default {
               }
             }
           },
+          label: {
+            normal: {
+              show: true,
+              position: 'top'
+            }
+          },
           smooth: true,
           type: 'line',
-          data: this.chartData.data,
-          animationDuration: 2800,
-          animationEasing: 'cubicInOut'
+          data: this.chartData.firstData
+        },{
+          name: this.chartData.secName,
+          type: 'line',
+          label: {
+            normal: {
+              show: true,
+              position: 'top'
+            }
+          },
+          data: this.chartData.secData
         }]
       })
     }

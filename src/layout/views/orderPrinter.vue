@@ -24,7 +24,7 @@
               <div class="printer-container-header-label">买家:</div>
             </el-col>
             <el-col :span="9">
-              <div class="printer-container-header-value">{{ item.buyer_login_id }}</div>
+              <div class="printer-container-header-value">{{ item.buyer_login_id }}【{{ item.to_full_name }}】</div>
             </el-col>
             <el-col :span="3">
               <div class="printer-container-header-label">下单日期:</div>
@@ -68,26 +68,9 @@
             <el-table-column label="货号" width="100px" align="center" prop="cargo_number"></el-table-column>
             <el-table-column label="规格" min-width="120px" align="center" prop="sku"></el-table-column>
             <el-table-column label="数量" width="80px" align="center" prop="quantity"></el-table-column>
-            <el-table-column label="单价" width="80px" align="center" prop="price"></el-table-column>
-            <el-table-column label="优惠(元)" width="90px" align="center" prop="discount"></el-table-column>
-            <el-table-column label="金额(元)" width="90px" align="center" prop="amount"></el-table-column>
           </el-table>
         </div>
         <div class="printer-container-footer">
-          <el-row :gutter="20">
-            <el-col :span="3">
-              <div class="printer-container-header-label">货品合计:</div>
-            </el-col>
-            <el-col :span="5">
-              <div class="printer-container-header-value">{{ item.sum_product_payment }}</div>
-            </el-col>
-            <el-col :span="3">
-              <div class="printer-container-header-label">运费:</div>
-            </el-col>
-            <el-col :span="5">
-              <div class="printer-container-header-value">{{ item.shipping_fee }}</div>
-            </el-col>
-          </el-row>
           <el-row :gutter="20">
             <el-col :span="3">
               <div class="printer-container-header-label">货品总量:</div>
@@ -96,10 +79,10 @@
               <div class="printer-container-header-value">{{ item.product_num }}</div>
             </el-col>
             <el-col :span="3">
-              <div class="printer-container-header-label">优惠:</div>
+              <div class="printer-container-header-label">运费:</div>
             </el-col>
             <el-col :span="5">
-              <div class="printer-container-header-value">{{ item.discount }}</div>
+              <div class="printer-container-header-value">{{ item.shipping_fee }}</div>
             </el-col>
             <el-col :span="3">
               <div class="printer-container-header-label">应收金额:</div>
@@ -206,6 +189,7 @@ export default {
 .printer-container {
   border: 1px solid #606266;
   margin-top: 10px;
+  page-break-after:always;
 }
 .printer-container-header h2 {
   text-align: center;

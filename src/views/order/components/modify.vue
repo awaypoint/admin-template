@@ -238,14 +238,19 @@ export default {
         if (dialogStatus === 'create') {
           this.resetForm('dialogForm')
         } else {
-          getOrderDetail({ id: this.row.id }).then( res => {
+          let params = {
+            id: this.row.id
+          }
+          if (typeof(this.row.api_type) !== 'undefined') {
+            params.api_type = this.row.api_type
+          }
+          getOrderDetail(params).then( res => {
             this.temp = res.response
           }).catch(() => {})
         }
       })
     },
     closeDialog() {
-      // this.$refs.addProduct.close()
       this.dialogShow = false
     },
     resetForm(formName) {

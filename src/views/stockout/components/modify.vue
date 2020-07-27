@@ -114,7 +114,8 @@
                 @mousewheel.native.prevent 
                 @input="editQuantity(scope.row)"
               />
-              <el-tag v-else size="small">{{ scope.row.quantity }}</el-tag>
+              <el-tag v-else-if="!scope.row.leaf" size="small">{{ scope.row.quantity }}</el-tag>
+              <span v-else>{{ scope.row.quantity }}</span>
             </div>
           </template>
         </el-table-column>
@@ -129,7 +130,8 @@
               min="0"
               @input="sumary"
             />
-            <el-tag v-else size="small">{{ scope.row.lack_quantity }}</el-tag>
+            <el-tag v-else-if="!scope.row.leaf" size="small">{{ scope.row.lack_quantity }}</el-tag>
+            <span v-else>{{ scope.row.lack_quantity }}</span>
           </template>
         </el-table-column>
         <el-table-column v-if="dialogStatus === 'create'" label="操作" align="center" min-width="130" class-name="small-padding fixed-width">

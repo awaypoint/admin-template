@@ -92,7 +92,8 @@ export default {
     doAsyn(params) {
       let asynParams = {
         step: params['step'] || 1,
-        shop_id: params['shop_id'] || 0
+        shop_id: params['shop_id'] || 0,
+        page: params['page'] || 1
       }
       asynData(asynParams).then( res => {
         const data = res.response
@@ -101,6 +102,7 @@ export default {
         if (!data.complete) {
           asynParams['step'] = data.next_step
           asynParams['shop_id'] = data.shop_id
+          asynParams['page'] = data.page || 1
           this.doAsyn(asynParams)
         } else {
           this.state.maxPrecent = 100

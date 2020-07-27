@@ -28,6 +28,7 @@
 
     <el-table
       :key="tableKey"
+      row-key="id"
       v-loading="listLoading"
       :data="list"
       border
@@ -35,23 +36,23 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange"
+      ref="listTableRef"
     >
       <el-table-column label="买家名称" min-width="200px" align="center">
         <template slot-scope="scope">
-          <img src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
           <span>{{ scope.row.buyer_login_id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="订单数量" width="120px" align="center" sortable prop="order_num">
+      <el-table-column label="订单数量" width="120px" align="center" sortable="custom" prop="order_num">
       </el-table-column>
-      <el-table-column label="订单金额" width="150px" align="center" sortable prop="order_amount">
+      <el-table-column label="订单金额" width="150px" align="center" sortable="custom" prop="order_amount">
       </el-table-column>
       <el-table-column label="买家类型" align="center">
         <template slot-scope="scope">
           <el-tag :type="scope.row.type === '1' ? 'danger' : ''">{{ typeMap[scope.row.type] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="同步时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="同步时间" width="160px" align="center" sortable="custom" prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -60,7 +61,8 @@
       <el-table-column label="操作" align="center" min-width="130" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini"  icon="el-icon-edit" v-show="checkPermission('getOrderDetail')" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button icon="el-icon-s-order" size="mini" type="primary" v-show="checkPermission('getOrderList')" @click="handleOrderList(scope.row)">订单列表</el-button>
+          <el-button icon="el-icon-s-order" size="mini" type="primary" v-show="checkPermission('getOrderList') && scope.row.type === '1'" @click="handleOrderList(scope.row)">订单列表</el-button>
+          <el-button icon="el-icon-s-order" size="mini" type="primary" v-show="checkPermission('getStockOutList') && scope.row.type === '2'" @click="handleStockOutList(scope.row)">出库单列表</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -153,8 +155,12 @@ export default {
       })
     },
     handleOrderList(row) {
-      this.$store.dispatch('const/setQuery', { buyer_login_id: row.buyer_login_id })
+      this.$store.dispatch('const/setQuery', { to_full_name: row.buyer_login_id })
       this.$router.push('/order/index')
+    },
+    handleStockOutList(row) {
+      this.$store.dispatch('const/setQuery', { to_full_name: row.buyer_login_id })
+      this.$router.push('/store/stockout')
     }
   }
 }

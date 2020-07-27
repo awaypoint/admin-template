@@ -48,6 +48,14 @@
               <div class="printer-container-header-value">{{ item.buyer_feed_back }}</div>
             </el-col>
           </el-row>
+          <el-row :gutter="10">
+            <el-col :span="3">
+              <div class="printer-container-header-label">补发日期:</div>
+            </el-col>
+            <el-col :span="21">
+              <div class="printer-container-header-value">{{ item.now_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</div>
+            </el-col>
+          </el-row>
         </div>
         <div class="printer-container-table">
           <el-table
@@ -63,7 +71,7 @@
                 <img :src="scope.row.image" style="height:64px;width:64px;">
               </template>
             </el-table-column>
-            <el-table-column label="库号" min-width="120px" align="center" prop="cargo_number"></el-table-column>
+            <el-table-column label="库号" min-width="120px" align="center" prop="stock"></el-table-column>
             <el-table-column label="货号" width="100px" align="center" prop="cargo_number"></el-table-column>
             <el-table-column label="规格" min-width="120px" align="center" prop="sku"></el-table-column>
             <el-table-column label="数量" width="80px" align="center" prop="quantity"></el-table-column>

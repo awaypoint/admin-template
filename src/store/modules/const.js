@@ -66,6 +66,27 @@ const state = {
     '上衣长': 'Top',
     '裤长': 'Pants',
   },
+  //stock
+  logTypeOptions: [
+    { key: '1', label: '入库' },
+    { key: '2', label: '出库' },
+    { key: '5', label: '补发' },
+    { key: '7', label: '盘点' }
+  ],
+  logTypeMap: {
+    '1': '入库',
+    '2': '撤销入库',
+    '3': '出库',
+    '4': '撤销出库',
+    '5': '补发',
+    '7': '盘点'
+  },
+  //statistics
+  sumaryTypeOptions: [
+    { key: 'all', label: '年' },
+    { key: 'year', label: '月' },
+    { key: 'month', label: '日' }
+  ],
   //common
   query: {},
   boolOptions: [
@@ -120,6 +141,9 @@ const mutations = {
 const actions = {
   setQuery({ commit }, data) {
     commit('CHANGE_ATTR', { key: 'query', value: data })
+  },
+  clearQuery({ commit }) {
+    commit('CHANGE_ATTR', { key: 'query', value: {} })
   }
 }
 

@@ -206,6 +206,13 @@ export const asyncRoutes = [
         name: 'inventory',
         route: 'Inventory',
         meta: { title: '盘点', icon: 'inventory' }
+      },
+      {
+        path: 'stocklog',
+        component: () => import('@/views/stock/log'),
+        name: 'stocklog',
+        // route: 'Inventory',
+        meta: { title: '出入库日志', icon: 'stocklog' }
       }
     ]
   },
@@ -231,6 +238,13 @@ export const asyncRoutes = [
         name: 'roles',
         route: 'Roles',
         meta: { title: '角色管理', icon: 'role' }
+      },
+      {
+        path: 'setting',
+        component: () => import('@/views/setting/index'),
+        name: 'setting',
+        route: 'Setting',
+        meta: { title: '系统设置', icon: 'setting' }
       }
     ]
   },
@@ -242,41 +256,40 @@ export const asyncRoutes = [
     name: 'statistics',
     meta: { title: '统计分析', icon: 'statistics' },
     children: [
-      
-      {
-        path: 'selling',
-        component: () => import('@/views/selling/index'),
-        name: 'selling',
-        // route: 'Selling',
-        meta: { title: '产品销售数据', icon: 'selling' }
-      },
       {
         path: 'orderStatistics',
-        component: () => import('@/views/order/statistics'),
+        component: () => import('@/views/statistics/orderStatistics'),
         name: 'orderStatistics',
         route: 'orderStatistics',
-        meta: { title: '订单统计', icon: 'selling' }
+        meta: { title: '订单统计', icon: 'orderstatistics' }
       },
       {
         path: 'profitStatistics',
-        component: () => import('@/views/selling/index'),
+        component: () => import('@/views/statistics/productProfit'),
         name: 'profitStatistics',
         // route: 'Selling',
-        meta: { title: '利润统计', icon: 'selling' }
+        meta: { title: '利润统计', icon: 'profit' }
       },
       {
         path: 'stockNumStatistics',
-        component: () => import('@/views/selling/index'),
+        component: () => import('@/views/statistics/stockNum'),
         name: 'stockNumStatistics',
-        // route: 'Selling',
+        route: 'stockNumStatistics',
         meta: { title: '出入库数量统计', icon: 'selling' }
       },
       {
         path: 'stockAmountStatistics',
-        component: () => import('@/views/selling/index'),
+        component: () => import('@/views/statistics/stockAmount'),
         name: 'stockAmountStatistics',
-        // route: 'Selling',
+        route: 'stockAmountStatistics',
         meta: { title: '出入库金额统计', icon: 'selling' }
+      },
+      {
+        path: 'selling',
+        component: () => import('@/views/statistics/productSale'),
+        name: 'selling',
+        route: 'productSale',
+        meta: { title: '产品销售数据', icon: 'productSale' }
       }
     ]
   },

@@ -37,13 +37,13 @@
           <span>{{ scope.row.order_num }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="授权到期时间" width="160px" align="center" sortable prop="refresh_toke_expire_at">
+      <el-table-column label="授权到期时间" width="160px" align="center" sortable="custom" prop="refresh_toke_expire_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.refresh_toke_expire_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="创建时间" width="160px" align="center" sortable="custom" prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -160,7 +160,7 @@ export default {
             showClose: true
           })
           this.handleFilter()
-        })
+        }).catch(() => {})
       }).catch(() => {})
     },
     gotoAuth(url) {

@@ -5,25 +5,35 @@
     </div>
     <el-table :data="list" v-loading="listLoading" max-height="500">
       <el-table-column label="订单编号" min-width="200" align="center" prop="order_id">
+        <template slot-scope="scope">
+          <a class="item-no-cls" @click="handleOrderView(scope.row)">{{ scope.row.order_id }}</a>
+        </template>
       </el-table-column>
       <el-table-column label="金额" width="195" align="center" prop="total_amount">
       </el-table-column>
     </el-table>
+    <modifyOrderDialog ref="modifyOrderDialog" :row="orderRow" @handleFilter="handleFilter" @handleStock="handleStock"></modifyOrderDialog>
+    <modifyStockDialog ref="modifyStockOutDialogRef" :row="stockoutRow" @handleFilter="handleFilter"></modifyStockDialog>
   </el-card>
 </template>
 
 <script>
 import { getOverOrders } from '@/api/report'
+import modifyOrderDialog from '@/views/order/components/modify';
+import modifyStockDialog from '@/views/stockout/components/modify';
 
 export default {
   name: 'bestOrders',
+  components: { modifyOrderDialog, modifyStockDialog },
   data() {
     return {
       listLoading: false,
       listQuery: {
 
       },
-      list: []
+      list: [],
+      orderRow: {},
+      stockoutRow: {}
     }
   },
   created() {
@@ -40,6 +50,20 @@ export default {
       }).catch(() => {
         this.listLoading = false
       })
+    },
+    handleOrderView(row) {
+      this.orderRow = row
+      this.$refs.modifyOrderDialog.showDialog('view')
+    },
+    handleFilter() {
+      return
+    },
+    handleStock(orderId) {
+      this.stockoutRow.order_id = orderId
+      this.stockoutRow.api_type = 'order'
+      setTimeout(() => {
+        this.$refs.modifyStockOutDialogRef.showDialog('create')
+      }, 0.5 * 1000);
     }
   }
 }

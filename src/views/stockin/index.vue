@@ -21,6 +21,7 @@
         @change="handleFilter"
       >
       </el-date-picker>
+      <factorySelect ref="factorySelectRef" @selectFactory="selectFactory" :isQuery="true"></factorySelect>
     </div>
 
     <el-table
@@ -50,12 +51,12 @@
           <span>{{ scope.row.amount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="运费" min-width="160px" align="center" sortable prop="shipping">
+      <el-table-column label="运费" min-width="160px" align="center" sortable="custom" prop="shipping">
         <template slot-scope="scope">
           <span>{{ scope.row.shipping }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="入库时间" width="160px" align="center" sortable prop="created_at">
+      <el-table-column label="入库时间" width="160px" align="center" sortable="custom" prop="created_at">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -88,11 +89,12 @@ import { mapGetters } from 'vuex'
 import { getStockInList, cancelStockIn } from '@/api/stockin'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { checkPermission } from '@/utils/index'
-import modifyStockIn from './components/modify';
+import modifyStockIn from './components/modify'
+import factorySelect from '@/components/factorySelect'
 
 export default {
   name: 'StockIn',
-  components: { Pagination, modifyStockIn },
+  components: { Pagination, modifyStockIn, factorySelect },
   data() {
     return {
       tableKey: 0,
@@ -110,6 +112,7 @@ export default {
         status: undefined,
         type: undefined,
         times: undefined,
+        factory: undefined,
         order_by: undefined,
         sort_by: undefined
       },
@@ -179,6 +182,10 @@ export default {
     },
     getSummaries() {
       return ['合计', this.quantitySum, this.amountSum, this.shippingSum]
+    },
+    selectFactory(value) {
+      this.listQuery.factory = value
+      this.handleFilter()
     }
   }
 }

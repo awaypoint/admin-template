@@ -52,6 +52,9 @@
           </template>
         </el-table-column>
         <el-table-column label="出库价格" width="200px" align="center" prop="price">
+          <template slot-scope="scope">
+            <span v-if="!scope.row.leaf">{{ scope.row.price }}</span>
+          </template>
         </el-table-column>
         <el-table-column v-if="dialogStatus === 'create'" label="库存" width="100px" align="center" prop="stock"></el-table-column>
         <el-table-column label="补发数量" min-width="150px" align="center" prop="quantity">
@@ -67,6 +70,7 @@
                 @mousewheel.native.prevent 
                 @input="editQuantity(scope.row)"
               />
+              <el-tag v-else-if="!scope.row.leaf" size="small">{{ scope.row.quantity }}</el-tag>
               <span v-else >{{ scope.row.quantity }}</span>
             </div>
           </template>
@@ -147,7 +151,7 @@ export default {
       this.dialogStatus = status
       this.dialogShow = true
       this.priceCls = this.dialogStatus === 'create' ? 'price-cls' : 'price-label-cls'
-      this.readOnly = this.disabled !== 'create'
+      this.readOnly = this.dialogStatus !== 'create'
       this.$nextTick(() => {
         if (status === 'create') {
           this.getStockOutDetail(this.row.id)
@@ -281,7 +285,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .price-cls {
-  display: flex;
+  display: inline;
 }
 .price-cls span {
   width: 60%;

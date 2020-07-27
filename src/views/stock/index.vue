@@ -8,7 +8,7 @@
       </div>
       <el-input v-model="listQuery.subject" placeholder="请输入产品名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.cargo_number" placeholder="请输入产品货号" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <factorySelect ref="factorySelectRef" :styleStr="selectFactoryStyle" width="150" @selectFactory="selectFactory"></factorySelect>
+      <factorySelect ref="factorySelectRef" :isQuery="true" width="150" @selectFactory="selectFactory"></factorySelect>
     </div>
 
     <el-table
@@ -40,7 +40,9 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column label="货号/尺码" min-width="100px" align="center" prop="cargo_number" sortable>
+      <el-table-column label="货号/尺码" min-width="100px" align="center" prop="cargo_number" sortable="custom">
+      </el-table-column>
+      <el-table-column label="库位" width="80px" align="center" prop="stock">
       </el-table-column>
       <el-table-column label="库存" width="80px" align="center" prop="quantity">
       </el-table-column>
@@ -53,7 +55,7 @@
       <el-table-column label="操作" align="center" min-width="100" prop="operate">
         <template scope="scope">
           <div v-if="typeof(scope.row.leaf) === 'undefined' || !scope.row.leaf">
-            <el-button size="mini" icon="el-icon-s-data" type="primary" v-show="checkPermission('productSale')">销售数据</el-button>
+            <el-button size="mini" icon="el-icon-s-data" type="primary" v-show="checkPermission('productSale')" @click="handleSale(scope.row)">销售数据</el-button>
           </div>
         </template>
       </el-table-column>
@@ -84,7 +86,6 @@ export default {
   components: { Pagination, factorySelect, productPopover, modifyProductDialog },
   data() {
     return {
-      selectFactoryStyle: 'display: inline-block;vertical-align: middle;margin-bottom: 10px;width:150px;',
       tableKey: 0,
       expands: [],
       list: [],
@@ -194,6 +195,15 @@ export default {
         })
       })
       return result
+    },
+    handleSale(row) {
+      const query = {
+        product_id: row.product_id,
+        cargo_number: row.cargo_number,
+        subject: row.subject
+      }
+      this.$store.dispatch('const/setQuery', query)
+      this.$router.push('/statistics/selling')
     }
   }
 }

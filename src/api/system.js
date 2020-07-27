@@ -89,3 +89,19 @@ export function asynData(data) {
     data
   })
 }
+
+export function getSetting(data) {
+  return request({
+    url: `getSetting`,
+    method: 'post',
+    data
+  })
+}
+
+export function updateSetting(data) {
+  return request({
+    url: `updateSetting`,
+    method: 'post',
+    data
+  })
+}

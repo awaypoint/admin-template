@@ -160,6 +160,11 @@ aside {
     background: #d0d0d0;
   }
 }
+.sub-navbar-title {
+  color: white;
+  text-align: center;
+  margin-bottom: 10px;
+}
 
 .link-type,
 .link-type:focus {
@@ -231,4 +236,10 @@ input[type=number] {
 .item-no-cls {
   color: #409EFF;
   cursor: pointer;
+}
+.popover-a {
+  color: #409EFF;
+}
+.table-header-center {
+  text-align: center !important;
 }

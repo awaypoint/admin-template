@@ -208,7 +208,6 @@ export default {
   },
   methods: {
     checkPermission(check) {
-      return true
       return checkPermission(this.permissions, check)
     },
     handleModifyState(row) {
@@ -305,7 +304,7 @@ export default {
             showClose: true
           })
           this.handleFilter()
-        })
+        }).catch(() => {})
       }).catch(() => {})
     },
     modifyUser(upData, isDialog) {

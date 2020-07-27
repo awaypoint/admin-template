@@ -20,7 +20,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '600px'
     },
     autoResize: {
       type: Boolean,
@@ -65,20 +65,16 @@ export default {
       this.chart.setOption({
         xAxis: {
           data: this.chartData.xAxis,
-          boundaryGap: false,
+          boundaryGap: true,
           axisTick: {
             show: false
-          },
-          // axisLabel: {
-          //   interval: 0,
-          //   rotate: 40
-          // }
+          }
         },
         grid: {
           left: 10,
           right: 30,
           bottom: 20,
-          top: 30,
+          top: 50,
           containLabel: true
         },
         tooltip: {
@@ -91,26 +87,35 @@ export default {
         yAxis: {
           axisTick: {
             show: false
+          },
+          max: function(value) {
+              return parseFloat(value.max * 1.1).toFixed(2);
           }
         },
         legend: {
-          data: [this.chartData.name]
+          data: this.chartData.name
         },
         series: [{
-          name: this.chartData.name, itemStyle: {
+          name: this.chartData.firstName,
+          label: {
             normal: {
-              color: '#FF005A',
-              lineStyle: {
-                color: '#FF005A',
-                width: 2
-              }
+              show: true,
+              position: 'insideTop'
             }
           },
           smooth: true,
-          type: 'line',
-          data: this.chartData.data,
-          animationDuration: 2800,
-          animationEasing: 'cubicInOut'
+          type: 'bar',
+          data: this.chartData.firstData
+        },{
+          name: this.chartData.secName,
+          type: 'bar',
+          label: {
+            normal: {
+              show: true,
+              position: 'insideTop'
+            }
+          },
+          data: this.chartData.secData
         }]
       })
     }

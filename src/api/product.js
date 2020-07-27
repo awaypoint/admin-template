@@ -63,3 +63,19 @@ export function getProductSize(data) {
     data
   })
 }
+
+export function getProductCombo(data) {
+  return request({
+    url: 'getProductCombo',
+    method: 'post',
+    data
+  })
+}
+
+export function getProductSkuCombo(data) {
+  return request({
+    url: 'getProductSkuCombo',
+    method: 'post',
+    data
+  })
+}

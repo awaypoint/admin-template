@@ -19,7 +19,12 @@
           <productPopover :data="scope.row" :reference="scope.row.subject"></productPopover>
         </template>
       </el-table-column>
-      <el-table-column label="数量" width="195" align="center">
+      <el-table-column label="货号" width="150" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.cargo_number }}
+        </template>
+      </el-table-column>
+      <el-table-column label="数量" width="100" align="center">
         <template slot-scope="scope">
           {{ scope.row.quantity }}
         </template>
