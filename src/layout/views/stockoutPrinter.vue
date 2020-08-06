@@ -9,7 +9,7 @@
     <div id="printContainerId" ref="print">
       <div class="printer-container" v-for="(item, index) in list" :key="index">
         <div class="printer-container-header">
-          <h2>{{ item.name }}补发单</h2>
+          <h2>{{ item.name }}出库单</h2>
           <el-row :gutter="10">
             <el-col :span="3">
               <div class="printer-container-header-label">订单号:</div>
@@ -134,7 +134,7 @@ export default {
   methods: {
     getOrders() {
       this.listLoading = true
-      getPrintOutOrders({ 'ids' : this.selectOrderIds }).then(res => {
+      getPrintOutOrders({ 'ids' : this.selectOrderIds, 'api_type': 'stockout' }).then(res => {
         this.list = res.response
         setTimeout(() => {
           this.listLoading = false

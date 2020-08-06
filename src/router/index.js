@@ -54,6 +54,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/stockoutPrinte',
+    component: () => import('@/layout/views/stockoutPrinter'),
+    hidden: true
+  },
+  {
     path: '/blog',
     component: () => import('@/layout/views/blog'),
     hidden: true

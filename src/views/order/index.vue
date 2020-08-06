@@ -130,7 +130,7 @@ export default {
         status: undefined,
         to_full_name: '',
         buyer_login_id: '',
-        order_by: 'created_at',
+        order_by: 'order_created_at',
         sort_by: 'desc',
         is_printed: undefined,
         is_stock: undefined,

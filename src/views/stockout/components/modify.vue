@@ -77,7 +77,7 @@
                 size="mini"
                 @mousewheel.native.prevent 
                 @input="multPrice"
-                placeholder="输入价格"/>
+                placeholder="每件减x元"/>
             </div>
           </template>
           <template slot-scope="scope" v-if="!scope.row.leaf">
@@ -151,6 +151,7 @@
           @click="dialogStatus==='create' ? submit($event) : closeDialog()"
           :loading="btnLoding"
         >确认</el-button>
+        <el-button type="success" size="small" @click="handlePrinte">打印</el-button>
       </div>
     </el-dialog>
   </div>
@@ -357,7 +358,7 @@ export default {
     multPrice() {
       if (this.dialogStatus === 'create' &&  Math.abs(this.diff) > 0 && this.temp.goods.length > 0) {
         this.temp.goods.forEach(good => {
-          good.price = parseFloat(good.price) + parseFloat(this.diff)
+          good.price = parseFloat(good.price) - parseFloat(this.diff)
         })
         this.sumary()
       }
@@ -423,6 +424,12 @@ export default {
         })
       })
       return result
+    },
+    handlePrinte() {
+      const list = [this.row.id]
+      this.$store.dispatch('order/setSelectStockout', list)
+      const routeData = this.$router.resolve({ path: '/stockoutPrinte' });
+      window.open(routeData.href, '_blank');
     }
   }
 }

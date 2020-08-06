@@ -2,6 +2,9 @@
   <div class="app-container">
     <div class="filter-container">
       <div class="filter-item-btn">
+        <el-button class="filter-item pan-btn green-btn" type="primary" icon="el-icon-printer" v-show="checkPermission('getPrintOutOrders')" @click="handlePrinte">
+          打印
+        </el-button>
         <el-button class="filter-item pan-btn green-btn" type="" icon="el-icon-plus" v-show="checkPermission('addStockOut')" @click="handleAdd">
           添加
         </el-button>
@@ -26,6 +29,7 @@
     </div>
 
     <el-table
+      ref="listTable"
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
@@ -35,6 +39,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
+      <el-table-column type="selection" width="50px" align="center"></el-table-column>
       <el-table-column label="出库单号" width="200px" align="center" prop="item_no">
         <template slot-scope="scope">
           <a class="item-no-cls" @click="handleView(scope.row)">{{ scope.row.item_no }}</a>
@@ -42,7 +47,6 @@
       </el-table-column>
       <el-table-column label="买家" min-width="150px" align="center" prop="buyer_login_id">
         <template slot-scope="scope">
-          <img v-show="scope.row.to_full_name" src="http://amos.alicdn.com/realonline.aw?v=2&uid=etindar&site=cntaobao&s=2&charset=utf-8" class="wangwang-cls">
           <el-tag type="" v-show="scope.row.to_full_name">{{ scope.row.to_full_name }}</el-tag>
           <span>{{ scope.row.buyer_login_id }}</span>
         </template>
@@ -188,6 +192,22 @@ export default {
       this.orderRow.id = this.orderRow.order_id
       this.orderRow.api_type = 'stockoutview'
       this.$refs.modifyOrderDialog.showDialog('view')
+    },
+    handlePrinte() {
+      const selection = this.$refs.listTable.selection
+      let list = []
+      selection.forEach(s => {
+        if (!s.leaf) {
+          list.push(s.id)
+        }
+      })
+      if (list.length <= 0) {
+        this.$message({ message: '请先选择需要打印的出货单', type: 'warning', showClose: true })
+        return
+      }
+      this.$store.dispatch('order/setSelectStockout', list)
+      const routeData = this.$router.resolve({ path: '/stockoutPrinte' });
+      window.open(routeData.href, '_blank');
     }
   }
 }
