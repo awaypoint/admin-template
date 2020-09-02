@@ -1,11 +1,11 @@
 module.exports = {
 
-  title: '1688库存管理系统',
+  title: '1688库存管理',
 
-   /**
-   * @type {boolean} true | false
-   * @description Whether show the settings right-panel
-   */
+  /**
+  * @type {boolean} true | false
+  * @description Whether show the settings right-panel
+  */
   showSettings: false,
 
   /**
@@ -13,7 +13,7 @@ module.exports = {
    * @description Whether need tagsView
    */
   tagsView: true,
-  
+
   /**
    * @type {boolean} true | false
    * @description Whether fix the header

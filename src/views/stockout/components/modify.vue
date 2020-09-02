@@ -415,14 +415,21 @@ export default {
       }
     },
     setSizeSort(children) {
+      const that = this
       let result = []
-      this.sizeSort.forEach(size => {
-        children.forEach(c => {
+      let noControl = []
+      children.forEach(c => {
+        that.sizeSort.every(size => {
           if (c.size === size) {
             result.push(c)
-          }
+            return false
+          } 
+          noControl.push(c)
         })
       })
+      if (noControl.length > 0) {
+        result = result.concat(noControl)
+      }
       return result
     },
     handlePrinte() {

@@ -222,6 +222,7 @@ export default {
       if (selected.length > 0) {
         if (type === 'select') {
           selected.forEach(sel => {
+            sel.price = sel.factory_price
             this.pushProduct(sel)
           })
           this.sumary()
@@ -230,6 +231,7 @@ export default {
           getExportProducts({ data: selected, ext: ['单价', '数量'] }).then(res => {
             if (res.response.length > 0) {
               res.response.forEach(resp => {
+                sel.price = sel.factory_price
                 this.pushProduct(resp)
               })
             }
@@ -273,8 +275,9 @@ export default {
       return ['', '合计', this.sumPrice, this.sumQuantity]
     },
     pushProduct(product) {
+      const that = this
       let shouldPush = true
-      this.temp.goods.forEach(good => {
+      that.temp.goods.forEach(good => {
         if (good.cargo_number === product.cargo_number) {
           shouldPush = false
           product.children.forEach(child => {
@@ -291,18 +294,26 @@ export default {
         }
       })
       if (shouldPush) {
-        this.temp.goods.push(product)
+        console.log(product, 'p')
+        that.temp.goods.push(product)
       }
     },
     setSizeSort(children) {
+      const that = this
       let result = []
-      this.sizeSort.forEach(size => {
-        children.forEach(c => {
+      let noControl = []
+      children.forEach(c => {
+        that.sizeSort.every(size => {
           if (c.size === size) {
             result.push(c)
-          }
+            return false
+          } 
+          noControl.push(c)
         })
       })
+      if (noControl.length > 0) {
+        result = result.concat(noControl)
+      }
       return result
     },
     tableRowClassName({ row, rowIndex }) {

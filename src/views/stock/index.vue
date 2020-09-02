@@ -186,14 +186,21 @@ export default {
       return ['合计', '库存金额:' + this.amount, '库存数量:' + this.quantity]
     },
     setSizeSort(children) {
+      const that = this
       let result = []
-      this.sizeSort.forEach(size => {
-        children.forEach(c => {
-          if (c.cargo_number === size) {
+      let noControl = []
+      children.forEach(c => {
+        that.sizeSort.every(size => {
+          if (c.size === size) {
             result.push(c)
-          }
+            return false
+          } 
+          noControl.push(c)
         })
       })
+      if (noControl.length > 0) {
+        result = result.concat(noControl)
+      }
       return result
     },
     handleSale(row) {

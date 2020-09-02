@@ -92,7 +92,7 @@ export default {
       },
       multipleSelection: [],
       pageSelection: [],
-      gridData: mockGridData,
+      gridData: [],
       tagTypeArr: ['info', 'warning', '', 'success',  'danger']
     }
   },
@@ -123,18 +123,21 @@ export default {
       this.listLoading = true
       this.setMultSelect()
       getSkuProducts(this.listQuery).then(res => {
+        const that = this
+        console.log(res, 'resd')
         const response = res.response
-        this.gridData = response.rows
-        this.total = response.total
-        if (this.gridData.length > 0 && this.selected.length > 0) {
-          this.$nextTick(() => {
-            this.gridData.forEach(data => {
-              if (this.selected.indexOf(data.id) > -1) {
-                this.$refs.addProductTableRef.toggleRowSelection(data)
-              }
-            })
-          })
-        }
+        that.gridData = response.rows
+        // that.total = response.total
+        console.log(that.gridData, 'res')
+        // if (that.gridData.length > 0 && that.selected.length > 0) {
+        //   that.$nextTick(() => {
+        //     that.gridData.forEach(data => {
+        //       if (that.selected.indexOf(data.id) > -1) {
+        //         that.$refs.addProductTableRef.toggleRowSelection(data)
+        //       }
+        //     })
+        //   })
+        // }
         setTimeout(() => {
           this.listLoading = false
         }, 0.3 * 1000)
