@@ -124,20 +124,18 @@ export default {
       this.setMultSelect()
       getSkuProducts(this.listQuery).then(res => {
         const that = this
-        console.log(res, 'resd')
         const response = res.response
         that.gridData = response.rows
-        // that.total = response.total
-        console.log(that.gridData, 'res')
-        // if (that.gridData.length > 0 && that.selected.length > 0) {
-        //   that.$nextTick(() => {
-        //     that.gridData.forEach(data => {
-        //       if (that.selected.indexOf(data.id) > -1) {
-        //         that.$refs.addProductTableRef.toggleRowSelection(data)
-        //       }
-        //     })
-        //   })
-        // }
+        that.total = response.total
+        if (that.gridData.length > 0 && that.selected.length > 0) {
+          that.$nextTick(() => {
+            that.gridData.forEach(data => {
+              if (that.selected.indexOf(data.id) > -1) {
+                //that.$refs.addProductTableRef.toggleRowSelection(data)
+              }
+            })
+          })
+        }
         setTimeout(() => {
           this.listLoading = false
         }, 0.3 * 1000)

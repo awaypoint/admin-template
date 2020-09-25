@@ -76,7 +76,7 @@ export default {
           { required: true, trigger: 'blur', validator: validPwdConfirm, message: '密码输入不一致' }
         ]
       },
-      imageUpHost:process.env.VUE_APP_BASE_API + 'uploadFile',
+      imageUpHost:CUSTOMCONF.apiHost + 'uploadFile',
       imagecropperShow: false,
       imagecropperKey: 0,
       formReadOnly: true

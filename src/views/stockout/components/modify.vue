@@ -162,7 +162,7 @@ import { addStockOut, getStockOutDetail } from '@/api/stockout'
 import { getOrderDetail } from '@/api/order'
 import { getExportProducts } from '@/api/product'
 import buyerSelect from '@/components/buyerSelect'
-import productBtnGroup from '@/components/productBtnGroup';
+import productBtnGroup from '@/components/productBtnGroup'
 import productPopover from '@/components/productPopover'
 
 export default {
@@ -419,13 +419,11 @@ export default {
       let result = []
       let noControl = []
       children.forEach(c => {
-        that.sizeSort.every(size => {
-          if (c.size === size) {
-            result.push(c)
-            return false
-          } 
+        if (that.sizeSort.indexOf(c.size) >= 0) {
+          result.push(c)
+        } else {
           noControl.push(c)
-        })
+        }
       })
       if (noControl.length > 0) {
         result = result.concat(noControl)

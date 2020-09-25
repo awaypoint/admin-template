@@ -296,7 +296,7 @@ export default {
         ]
       },
       btnLoding: false,
-      imageUpHost: process.env.VUE_APP_BASE_API + 'uploadFile',
+      imageUpHost: CUSTOMCONF.apiHost + 'uploadFile',
       sizeTableColumns: [],
       img: ''
     }

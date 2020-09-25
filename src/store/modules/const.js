@@ -34,12 +34,12 @@ const state = {
   //product
   colorOptions: [
     { value: false, label: '红色', img: '' },
-    { value: false, label: '白色', img: ''  },
-    { value: false, label: '绿色', img: ''  },
-    { value: false, label: '黑色', img: ''  },
-    { value: false, label: '紫色', img: ''  },
-    { value: false, label: '蓝色', img: ''  },
-    { value: false, label: '灰色', img: ''  }
+    { value: false, label: '白色', img: '' },
+    { value: false, label: '绿色', img: '' },
+    { value: false, label: '黑色', img: '' },
+    { value: false, label: '紫色', img: '' },
+    { value: false, label: '蓝色', img: '' },
+    { value: false, label: '灰色', img: '' }
   ],
   sizeOptions: [
     { value: false, label: 'S' },
@@ -49,7 +49,7 @@ const state = {
     { value: false, label: 'XXL' },
     { value: false, label: 'XXXL' }
   ],
-  sizeSort: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+  sizeSort: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL'],
   sizeTableOptions: [
     { value: true, label: '胸围' },
     { value: true, label: '腰围' },

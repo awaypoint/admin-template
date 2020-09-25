@@ -100,7 +100,7 @@ export default {
     }
     return {
       showSettings: true,
-      imageUpHost: process.env.VUE_APP_BASE_API + 'uploadFile',
+      imageUpHost: CUSTOMCONF.apiHost + 'uploadFile',
       imagecropperShow: false,
       imagecropperKey: 0,
       resetPwdFDialogVisible: false,

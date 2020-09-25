@@ -49,7 +49,7 @@ export default {
     },
     downloadTemplate() {
       const fileName = templateFiles[this.templateType]
-      const url = process.env.VUE_APP_FILE_API + templateFiles[this.templateType]
+      const url = CUSTOMCONF.fileHost + templateFiles[this.templateType]
       const link = document.createElement('a')
       link.style.display ='none'
       link.href = url

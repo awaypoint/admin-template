@@ -32,6 +32,9 @@
           <el-input v-model="temp.remark" type="textarea" :readonly="readOnly"/>
         </el-form-item>
       </el-form>
+      <div>
+        <productBtnGroup templateType="stockout" @insertProduct="insertProduct"></productBtnGroup>
+      </div>
       <el-table
         row-key="id"
         :data="temp.goods"
@@ -69,13 +72,26 @@
                 min="0"
                 @mousewheel.native.prevent 
                 @input="editQuantity(scope.row)"
-              />
-              <el-tag v-else-if="!scope.row.leaf" size="small">{{ scope.row.quantity }}</el-tag>
-              <span v-else >{{ scope.row.quantity }}</span>
+              ></el-input>
+              <div v-else>
+                <el-tag v-if="!scope.row.leaf" size="small">{{ scope.row.quantity }}</el-tag>
+                <span v-if="scope.row.leaf" >{{ scope.row.quantity }}</span>
+              </div>
             </div>
           </template>
         </el-table-column>
         <el-table-column v-if="dialogStatus === 'create'" label="缺货数量" width="100px" align="center" prop="lack_quantity">
+          <template slot-scope="scope">
+            <el-input 
+              v-model="scope.row.lack_quantity"
+              class="edit-input"
+              size="mini"
+              type="number"
+              min="0"
+              @mousewheel.native.prevent 
+              @input="sumary()"
+            ></el-input>
+          </template>
         </el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
@@ -93,12 +109,14 @@
 
 <script>
 import { getStockOutDetail } from '@/api/stockout'
+import { getExportProducts } from '@/api/product'
 import { addReissue, getReissueDetail } from '@/api/reissue'
+import productBtnGroup from '@/components/productBtnGroup'
 import productPopover from '@/components/productPopover'
 
 export default {
   name: 'modifyReissue',
-  components: { productPopover },
+  components: { productPopover, productBtnGroup },
   props: {
     row: {
       type: Object,
@@ -274,19 +292,65 @@ export default {
       let result = []
       let noControl = []
       children.forEach(c => {
-        that.sizeSort.every(size => {
-          if (c.size === size) {
-            result.push(c)
-            return false
-          } 
+        if (that.sizeSort.indexOf(c.size) >= 0) {
+          result.push(c)
+        } else {
           noControl.push(c)
-        })
+        }
       })
       if (noControl.length > 0) {
         result = result.concat(noControl)
       }
       return result
     },
+    insertProduct(selected, type) {
+      type = type || 'select'
+      if (selected.length > 0) {
+        if (type === 'select') {
+          selected.forEach(sel => {
+            sel.lack_quantity = ''
+            this.pushProduct(sel)
+          })
+          this.sumary()
+          this.$store.dispatch('addproduct/setSelected', this.temp.goods)
+        }else {
+          getExportProducts({ data: selected, ext: ['单价', '数量'] }).then(res => {
+            if (res.response.length > 0) {
+              res.response.forEach(resp => {
+                this.pushProduct(resp)
+              })
+            }
+            this.$nextTick(() => {
+              this.sumary()
+            })
+          })
+        }
+      }
+    },
+    pushProduct(product) {
+      let shouldPush = true
+      this.temp.goods.forEach(good => {
+        if (good.cargo_number === product.cargo_number) {
+          shouldPush = false
+          product.children.forEach(child => {
+            child['product_sku_id'] = child['id']
+            child['id'] = child['id'] + '-custom'//自定义id
+            let childExist = false
+            good.children.forEach(gc => {
+              if (child.size === gc.size) {
+                childExist = true
+              }
+            })
+            if (!childExist) {
+              good.children.push(child)
+            }
+          })
+        }
+      })
+      if (shouldPush) {
+        this.temp.goods.push(product)
+      }
+    }
   }
 }
 </script>

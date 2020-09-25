@@ -190,13 +190,11 @@ export default {
       let result = []
       let noControl = []
       children.forEach(c => {
-        that.sizeSort.every(size => {
-          if (c.size === size) {
-            result.push(c)
-            return false
-          } 
+        if (that.sizeSort.indexOf(c.size) >= 0) {
+          result.push(c)
+        } else {
           noControl.push(c)
-        })
+        }
       })
       if (noControl.length > 0) {
         result = result.concat(noControl)
